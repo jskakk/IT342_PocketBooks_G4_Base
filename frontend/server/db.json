@@ -1,0 +1,25 @@
+{
+  "users": [
+    {
+      "id": "76b0e7a7-016b-44a8-aa83-b0466257ff71",
+      "name": "Test User",
+      "email": "testuser@example.com",
+      "passwordHash": "$2b$12$p3nADavmS2xNsa.p3r6HhuHqfki/kSvJGW/wna5jViFFet8/KYTlu",
+      "createdAt": "2026-03-04T09:37:51.972Z"
+    },
+    {
+      "id": "b9a7f567-833c-4b87-ae6b-56d3e1cb0d07",
+      "name": "Sample User",
+      "email": "user1772617262218@example.com",
+      "passwordHash": "$2b$12$Zj5JxcvXY1ViJMLWs0VLjug4gWMu9tbPy8pT8M6A/8mHcdnF1M3xa",
+      "createdAt": "2026-03-04T09:41:02.602Z"
+    },
+    {
+      "id": "ef220062-d477-4eb5-832a-aa0b6a7913e6",
+      "name": "Testuser",
+      "email": "testuser@gmail.com",
+      "passwordHash": "$2b$12$0itxixL2mdAV9ZvwcIOCKu2IFky5pImx8ma56Gw4rsusunsk7fpr6",
+      "createdAt": "2026-03-04T09:48:34.515Z"
+    }
+  ]
+}
