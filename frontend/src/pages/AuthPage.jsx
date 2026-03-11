@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
+
+const GOOGLE_CLIENT_ID = '123456789-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com'
 
 const initialLogin = {
   email: '',
@@ -81,142 +84,184 @@ function AuthPage({ mode }) {
     }
   }
 
+  const handleGoogleLogin = async (credentialResponse) => {
+    setError('')
+    setSuccess('')
+
+    try {
+      setIsSubmitting(true)
+
+      const response = await fetch('/api/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        setError(data.message || 'Google authentication failed.')
+        return
+      }
+
+      localStorage.setItem('authUser', JSON.stringify(data.user))
+      localStorage.setItem('authToken', data.token)
+      localStorage.setItem('authProvider', 'google')
+      navigate('/dashboard')
+    } catch (error) {
+      setError('Could not complete Google login. Please try again.')
+      console.error('Google login error:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleGoogleError = () => {
+    setError('Google Sign-In failed. Please try a different method.')
+  }
+
   return (
-    <div className="auth-page">
-      <aside className="promo-panel">
-        <div className="brand">💰 PocketBooks</div>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <div className="auth-page">
+        <aside className="promo-panel">
+          <div className="brand">💰 PocketBooks</div>
 
-        <h1>Track Every Peso, Stress-Free.</h1>
-        <p className="promo-description">
-          The smart expense tracker built for Filipino students. Log expenses,
-          upload receipts, and see your balance in any currency — all in one place.
-        </p>
-
-        <div className="feature-list">
-          <div className="feature-item">
-            <div className="feature-icon">📊</div>
-            <div>
-              <h3>Expense Tracking</h3>
-              <span>Available on Web &amp; Android</span>
-            </div>
-          </div>
-
-          <div className="feature-item">
-            <div className="feature-icon">🧾</div>
-            <div>
-              <h3>Receipt Upload</h3>
-              <span>Available on Web &amp; Android</span>
-            </div>
-          </div>
-
-          <div className="feature-item">
-            <div className="feature-icon">💱</div>
-            <div>
-              <h3>Currency Conversion</h3>
-              <span>Available on Web &amp; Android</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="decor decor-left" />
-        <div className="decor decor-right" />
-      </aside>
-
-      <main className="form-panel">
-        <form className="auth-card" onSubmit={submit}>
-          <div className="auth-tabs">
-            <Link to="/login" className={`tab ${!isRegister ? 'tab-active' : ''}`}>
-              Sign In
-            </Link>
-            <Link to="/register" className={`tab ${isRegister ? 'tab-active' : ''}`}>
-              Sign Up
-            </Link>
-          </div>
-
-          <h2>{isRegister ? 'Create your account ✨' : 'Welcome back! 👋'}</h2>
-          <p className="subtext">
-            {isRegister
-              ? 'Sign up to start managing your PocketBooks account.'
-              : 'Sign in to your PocketBooks account.'}
+          <h1>Track Every Peso, Stress-Free.</h1>
+          <p className="promo-description">
+            The smart expense tracker built for Filipino students. Log expenses,
+            upload receipts, and see your balance in any currency — all in one place.
           </p>
 
-          {!isRegister && (
-            <button type="button" className="google-btn">
-              <span className="google-dot" /> Continue with Google
+          <div className="feature-list">
+            <div className="feature-item">
+              <div className="feature-icon">📊</div>
+              <div>
+                <h3>Expense Tracking</h3>
+                <span>Available on Web &amp; Android</span>
+              </div>
+            </div>
+
+            <div className="feature-item">
+              <div className="feature-icon">🧾</div>
+              <div>
+                <h3>Receipt Upload</h3>
+                <span>Available on Web &amp; Android</span>
+              </div>
+            </div>
+
+            <div className="feature-item">
+              <div className="feature-icon">💱</div>
+              <div>
+                <h3>Currency Conversion</h3>
+                <span>Available on Web &amp; Android</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="decor decor-left" />
+          <div className="decor decor-right" />
+        </aside>
+
+        <main className="form-panel">
+          <form className="auth-card" onSubmit={submit}>
+            <div className="auth-tabs">
+              <Link to="/login" className={`tab ${!isRegister ? 'tab-active' : ''}`}>
+                Sign In
+              </Link>
+              <Link to="/register" className={`tab ${isRegister ? 'tab-active' : ''}`}>
+                Sign Up
+              </Link>
+            </div>
+
+            <h2>{isRegister ? 'Create your account ✨' : 'Welcome back! 👋'}</h2>
+            <p className="subtext">
+              {isRegister
+                ? 'Sign up to start managing your PocketBooks account.'
+                : 'Sign in to your PocketBooks account.'}
+            </p>
+
+            {!isRegister && (
+              <div className="google-login-container">
+                <GoogleLogin
+                  onSuccess={handleGoogleLogin}
+                  onError={handleGoogleError}
+                  useOneTap
+                  text="signin_with"
+                />
+              </div>
+            )}
+
+            <div className="separator">
+              <span>{isRegister ? 'Create with email' : 'Email Address'}</span>
+              <span>{isRegister ? 'required fields' : 'or sign in with email'}</span>
+            </div>
+
+            {isRegister && (
+              <>
+                <label className="field-label" htmlFor="name">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Juan Dela Cruz"
+                  value={formData.name}
+                  onChange={onChange}
+                />
+              </>
+            )}
+
+            <label className="field-label" htmlFor="email">
+              Email Address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="student@example.com"
+              value={formData.email}
+              onChange={onChange}
+            />
+
+            <label className="field-label" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={onChange}
+            />
+
+            {!isRegister && (
+              <a href="#" className="forgot-link">
+                Forgot password?
+              </a>
+            )}
+
+            {error && <p className="form-message form-error">{error}</p>}
+            {success && <p className="form-message form-success">{success}</p>}
+
+            <button type="submit" className="signin-btn" disabled={isSubmitting}>
+              {isSubmitting
+                ? 'Please wait...'
+                : isRegister
+                  ? 'Create PocketBooks Account'
+                  : 'Sign In to PocketBooks'}
             </button>
-          )}
 
-          <div className="separator">
-            <span>{isRegister ? 'Create with email' : 'Email Address'}</span>
-            <span>{isRegister ? 'required fields' : 'or sign in with email'}</span>
-          </div>
-
-          {isRegister && (
-            <>
-              <label className="field-label" htmlFor="name">
-                Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="Juan Dela Cruz"
-                value={formData.name}
-                onChange={onChange}
-              />
-            </>
-          )}
-
-          <label className="field-label" htmlFor="email">
-            Email Address
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="student@example.com"
-            value={formData.email}
-            onChange={onChange}
-          />
-
-          <label className="field-label" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={onChange}
-          />
-
-          {!isRegister && (
-            <a href="#" className="forgot-link">
-              Forgot password?
-            </a>
-          )}
-
-          {error && <p className="form-message form-error">{error}</p>}
-          {success && <p className="form-message form-success">{success}</p>}
-
-          <button type="submit" className="signin-btn" disabled={isSubmitting}>
-            {isSubmitting
-              ? 'Please wait...'
-              : isRegister
-                ? 'Create PocketBooks Account'
-                : 'Sign In to PocketBooks'}
-          </button>
-
-          <p className="signup-line">
-            {isRegister ? "Already have an account? " : "Don't have an account? "}
-            <Link to={isRegister ? '/login' : '/register'}>
-              {isRegister ? 'Sign in instead' : "Create one — it's free!"}
-            </Link>
-          </p>
-        </form>
-      </main>
-    </div>
+            <p className="signup-line">
+              {isRegister ? "Already have an account? " : "Don't have an account? "}
+              <Link to={isRegister ? '/login' : '/register'}>
+                {isRegister ? 'Sign in instead' : "Create one — it's free!"}
+              </Link>
+            </p>
+          </form>
+        </main>
+      </div>
+    </GoogleOAuthProvider>
   )
 }
 

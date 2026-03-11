@@ -4,9 +4,11 @@ import express from 'express'
 import { randomUUID } from 'node:crypto'
 import { Low } from 'lowdb'
 import { JSONFile } from 'lowdb/node'
+import jwt from 'jsonwebtoken'
 
 const app = express()
 const PORT = 4000
+const JWT_SECRET = 'pocketbooks_jwt_secret_key_2026'
 
 const DEFAULT_CURRENCY = 'PHP'
 const EXCHANGE_RATES = {
@@ -41,6 +43,24 @@ const normalizeCurrency = (currency) => {
 }
 
 const parseToken = (token) => token?.replace('demo-token-', '')
+
+const decodeGoogleToken = (token) => {
+  try {
+    // Google token format: [header].[payload].[signature]
+    // For this demo, we'll decode the payload without verification
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return null
+    }
+
+    const payload = parts[1]
+    const decoded = JSON.parse(Buffer.from(payload, 'base64').toString())
+    return decoded
+  } catch (error) {
+    console.error('Failed to decode Google token:', error)
+    return null
+  }
+}
 
 const getUserFromRequest = (req) => {
   const authorizationHeader = req.headers.authorization || ''
@@ -184,6 +204,61 @@ app.post('/api/login', async (req, res) => {
     user: sanitizeUser(user),
     token: `demo-token-${user.id}`,
   })
+})
+
+app.post('/api/google-login', async (req, res) => {
+  const { token } = req.body
+
+  if (!token?.trim()) {
+    return res.status(400).json({
+      message: 'Google token is required.',
+    })
+  }
+
+  try {
+    const googleUser = decodeGoogleToken(token)
+
+    if (!googleUser || !googleUser.email) {
+      return res.status(400).json({
+        message: 'Invalid Google token.',
+      })
+    }
+
+    const normalizedEmail = normalizeEmail(googleUser.email)
+    let user = db.data.users.find((item) => item.email === normalizedEmail)
+
+    if (!user) {
+      // Auto-register user from Google profile
+      user = {
+        id: randomUUID(),
+        name: googleUser.name || googleUser.email.split('@')[0],
+        email: normalizedEmail,
+        googleId: googleUser.sub,
+        authProvider: 'google',
+        createdAt: new Date().toISOString(),
+      }
+
+      db.data.users.push(user)
+      await db.write()
+    } else if (!user.googleId) {
+      // Link Google account to existing user
+      user.googleId = googleUser.sub
+      user.authProvider = 'google'
+      await db.write()
+    }
+
+    return res.status(200).json({
+      message: 'Google login successful.',
+      user: sanitizeUser(user),
+      token: `demo-token-${user.id}`,
+      provider: 'google',
+    })
+  } catch (error) {
+    console.error('Google login error:', error)
+    return res.status(500).json({
+      message: 'Failed to process Google login.',
+    })
+  }
 })
 
 app.get('/api/expenses', (req, res) => {
