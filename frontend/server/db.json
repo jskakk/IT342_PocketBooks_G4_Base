@@ -27,6 +27,14 @@
       "email": "basejascha@gmail.com",
       "passwordHash": "$2b$12$tKovulyGYKCdMQKfkgJLp.jmVgTwART1aYG46VcwRfY4oepnVftzO",
       "createdAt": "2026-03-11T11:45:31.282Z"
+    },
+    {
+      "id": "google-user-demo-001",
+      "name": "Demo Google User",
+      "email": "demo.google@example.com",
+      "googleId": "110169234559156813851",
+      "authProvider": "google",
+      "createdAt": "2026-03-11T12:00:00.000Z"
     }
   ],
   "expenses": [
