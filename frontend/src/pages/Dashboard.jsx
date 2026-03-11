@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Sidebar from '../components/Sidebar'
+import PieChart from '../components/PieChart'
 
 const fallbackCategories = [
   'Food',
@@ -20,46 +22,15 @@ const fallbackCurrencies = {
   GBP: 71.52,
 }
 
-const initialForm = {
-  title: '',
-  category: 'Food',
-  amount: '',
-  currency: 'PHP',
-  expenseDate: new Date().toISOString().slice(0, 10),
-  notes: '',
-  receiptName: '',
-  receiptSize: 0,
-}
-
-const currencyFormatter = new Intl.NumberFormat('en-PH', {
+const phpFormatter = new Intl.NumberFormat('en-PH', {
   style: 'currency',
   currency: 'PHP',
 })
 
-const compactNumberFormatter = new Intl.NumberFormat('en-PH', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
+const usdFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
 })
-
-const formatReceiptSize = (size) => {
-  if (!size) {
-    return 'No file attached'
-  }
-
-  if (size >= 1024 * 1024) {
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`
-  }
-
-  return `${Math.max(1, Math.round(size / 1024))} KB`
-}
-
-const formatDisplayAmount = (amount, currency) => {
-  if (!amount) {
-    return '—'
-  }
-
-  return `${currency} ${compactNumberFormatter.format(Number(amount))}`
-}
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -74,14 +45,11 @@ function Dashboard() {
   const [expenses, setExpenses] = useState([])
   const [categories, setCategories] = useState(fallbackCategories)
   const [currencies, setCurrencies] = useState(fallbackCurrencies)
-  const [formData, setFormData] = useState(initialForm)
-  const [selectedMonth, setSelectedMonth] = useState('all')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [displayCurrency, setDisplayCurrency] = useState('PHP')
 
   useEffect(() => {
     if (!user) {
@@ -99,33 +67,18 @@ function Dashboard() {
         setIsLoading(true)
         setError('')
 
-        const [metaResponse, expensesResponse] = await Promise.all([
-          fetch('/api/meta'),
-          fetch(`/api/expenses?userId=${user.id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-        ])
+        const expensesResponse = await fetch(`/api/expenses?userId=${user.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
 
-        const metaData = metaResponse.ok ? await metaResponse.json() : null
         const expenseData = await expensesResponse.json()
-
         if (!expensesResponse.ok) {
-          throw new Error(expenseData.message || 'Failed to load your expenses.')
+          throw new Error(expenseData.message || 'Failed to load expenses.')
         }
 
         setExpenses(expenseData.expenses || [])
-        if (metaData?.categories?.length) {
-          setCategories(metaData.categories)
-          setFormData((prev) => ({
-            ...prev,
-            category: metaData.categories[0],
-          }))
-        }
-        if (metaData?.currencies) {
-          setCurrencies(metaData.currencies)
-        }
       } catch (loadError) {
         setError(loadError.message || 'Could not load dashboard data.')
       } finally {
@@ -134,116 +87,62 @@ function Dashboard() {
     }
 
     loadDashboardData()
-  }, [token, navigate, user])
+  }, [token, user])
 
   if (!user) {
     return null
   }
 
-  const availableMonths = [...new Set(expenses.map((expense) => expense.expenseDate.slice(0, 7)))].sort(
-    (left, right) => right.localeCompare(left),
+  const totalBalance = expenses.reduce((sum, e) => sum + e.amountPhp, 0)
+  const thisMonth = new Date().toISOString().slice(0, 7)
+  const monthSpent = expenses
+    .filter((e) => e.expenseDate.startsWith(thisMonth))
+    .reduce((sum, e) => sum + e.amountPhp, 0)
+  const saved = totalBalance > monthSpent ? totalBalance - monthSpent : 0
+
+  const receiptCount = expenses.filter((e) => e.receiptName).length
+
+  const categorySpending = categories.map((cat) => ({
+    category: cat,
+    value: expenses
+      .filter((e) => e.category === cat)
+      .reduce((sum, e) => sum + e.amountPhp, 0),
+  }))
+
+  const topSpending = categorySpending.filter((c) => c.value > 0)
+
+  const sortedExpenses = [...expenses].sort(
+    (a, b) => new Date(b.expenseDate) - new Date(a.expenseDate),
   )
 
-  const filteredExpenses = expenses.filter((expense) => {
-    const matchesMonth = selectedMonth === 'all' || expense.expenseDate.startsWith(selectedMonth)
-    const matchesCategory = selectedCategory === 'all' || expense.category === selectedCategory
-    const keyword = searchTerm.trim().toLowerCase()
-    const matchesKeyword =
-      !keyword ||
-      expense.title.toLowerCase().includes(keyword) ||
-      expense.notes.toLowerCase().includes(keyword)
+  const totalPages = Math.ceil(sortedExpenses.length / itemsPerPage)
+  const startIdx = (currentPage - 1) * itemsPerPage
+  const paginatedExpenses = sortedExpenses.slice(startIdx, startIdx + itemsPerPage)
 
-    return matchesMonth && matchesCategory && matchesKeyword
-  })
-
-  const totalSpent = filteredExpenses.reduce((sum, expense) => sum + expense.amountPhp, 0)
-  const monthlyTotal = filteredExpenses
-    .filter((expense) => expense.expenseDate.startsWith(new Date().toISOString().slice(0, 7)))
-    .reduce((sum, expense) => sum + expense.amountPhp, 0)
-
-  const topCategory =
-    Object.entries(
-      filteredExpenses.reduce((accumulator, expense) => {
-        accumulator[expense.category] = (accumulator[expense.category] || 0) + expense.amountPhp
-        return accumulator
-      }, {}),
-    ).sort((left, right) => right[1] - left[1])[0]?.[0] || 'No data yet'
-
-  const recentReceiptCount = filteredExpenses.filter((expense) => expense.receiptName).length
-
-  const handleChange = (event) => {
-    const { name, value } = event.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const convertCurrency = (php, toCurrency) => {
+    if (toCurrency === 'PHP') return php
+    return php / currencies[toCurrency]
   }
 
-  const handleReceiptChange = (event) => {
-    const file = event.target.files?.[0]
-
-    setFormData((prev) => ({
-      ...prev,
-      receiptName: file?.name || '',
-      receiptSize: file?.size || 0,
-    }))
+  const formatCurrency = (amount, curr) => {
+    if (curr === 'PHP') {
+      return phpFormatter.format(amount)
+    } else if (curr === 'USD') {
+      return usdFormatter.format(amount)
+    }
+    return `${curr} ${amount.toFixed(2)}`
   }
 
-  const resetForm = () => {
-    setFormData({
-      ...initialForm,
-      category: categories[0] || 'Food',
-    })
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    setError('')
-    setSuccess('')
-
-    if (!formData.title.trim()) {
-      setError('Expense title is required.')
-      return
-    }
-
-    if (!formData.amount || Number(formData.amount) <= 0) {
-      setError('Amount must be greater than zero.')
-      return
-    }
-
-    try {
-      setIsSaving(true)
-
-      const response = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...formData,
-          userId: user.id,
-          amount: Number(formData.amount),
-        }),
-      })
-
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to save expense.')
-      }
-
-      setExpenses((prev) => [data.expense, ...prev])
-      setSuccess('Expense added successfully.')
-      resetForm()
-    } catch (submitError) {
-      setError(submitError.message || 'Could not save expense.')
-    } finally {
-      setIsSaving(false)
-    }
+  const getInitials = () => {
+    return user.name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
   }
 
   const handleDelete = async (expenseId) => {
     try {
-      setError('')
-      setSuccess('')
-
       const response = await fetch(`/api/expenses/${expenseId}?userId=${user.id}`, {
         method: 'DELETE',
         headers: {
@@ -251,15 +150,16 @@ function Dashboard() {
         },
       })
 
-      const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete expense.')
+        throw new Error('Failed to delete expense.')
       }
 
-      setExpenses((prev) => prev.filter((expense) => expense.id !== expenseId))
-      setSuccess('Expense deleted successfully.')
-    } catch (deleteError) {
-      setError(deleteError.message || 'Could not delete expense.')
+      setExpenses((prev) => prev.filter((e) => e.id !== expenseId))
+      if (paginatedExpenses.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1)
+      }
+    } catch (delError) {
+      setError(delError.message || 'Could not delete expense.')
     }
   }
 
@@ -270,247 +170,200 @@ function Dashboard() {
   }
 
   return (
-    <div className="dashboard-shell">
-      <header className="dashboard-topbar">
-        <div>
-          <p className="eyebrow">PocketBooks dashboard</p>
-          <h1>Hello, {user.name.split(' ')[0]} 👋</h1>
-          <p className="dashboard-intro">
-            Track daily spending, review your uploaded receipts, and compare values across currencies.
-          </p>
-        </div>
+    <div className="dashboard-layout">
+      <Sidebar active="dashboard" />
 
-        <div className="topbar-actions">
-          <div className="user-chip">
-            <span>{user.email}</span>
-          </div>
-          <button type="button" className="ghost-btn" onClick={handleLogout}>
-            Log out
-          </button>
-        </div>
-      </header>
-
-      {(error || success) && (
-        <div className="status-stack">
-          {error && <p className="form-message form-error">{error}</p>}
-          {success && <p className="form-message form-success">{success}</p>}
-        </div>
-      )}
-
-      <section className="stats-grid">
-        <article className="stat-card">
-          <span>Total spent</span>
-          <strong>{currencyFormatter.format(totalSpent)}</strong>
-          <small>Filtered results in PHP</small>
-        </article>
-        <article className="stat-card">
-          <span>This month</span>
-          <strong>{currencyFormatter.format(monthlyTotal)}</strong>
-          <small>Current month spending</small>
-        </article>
-        <article className="stat-card">
-          <span>Top category</span>
-          <strong>{topCategory}</strong>
-          <small>Highest spending bucket</small>
-        </article>
-        <article className="stat-card">
-          <span>Receipts attached</span>
-          <strong>{recentReceiptCount}</strong>
-          <small>Expenses with proof uploaded</small>
-        </article>
-      </section>
-
-      <section className="dashboard-grid">
-        <div className="panel-card form-card">
-          <div className="section-heading">
-            <div>
-              <h2>Add expense</h2>
-              <p>Save a new expense entry with optional receipt metadata.</p>
-            </div>
-          </div>
-
-          <form className="expense-form" onSubmit={handleSubmit}>
-            <div className="field-group field-span-2">
-              <label htmlFor="title">Expense title</label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                placeholder="e.g. School supplies"
-                value={formData.title}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="field-group">
-              <label htmlFor="category">Category</label>
-              <select id="category" name="category" value={formData.category} onChange={handleChange}>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field-group">
-              <label htmlFor="expenseDate">Date</label>
-              <input
-                id="expenseDate"
-                name="expenseDate"
-                type="date"
-                value={formData.expenseDate}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="field-group">
-              <label htmlFor="amount">Amount</label>
-              <input
-                id="amount"
-                name="amount"
-                type="number"
-                min="0.01"
-                step="0.01"
-                placeholder="0.00"
-                value={formData.amount}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="field-group">
-              <label htmlFor="currency">Currency</label>
-              <select id="currency" name="currency" value={formData.currency} onChange={handleChange}>
-                {Object.keys(currencies).map((currencyCode) => (
-                  <option key={currencyCode} value={currencyCode}>
-                    {currencyCode}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field-group field-span-2">
-              <label htmlFor="notes">Notes</label>
-              <textarea
-                id="notes"
-                name="notes"
-                rows="4"
-                placeholder="Add details like merchant, purpose, or class requirement."
-                value={formData.notes}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="field-group field-span-2">
-              <label htmlFor="receipt">Receipt upload</label>
-              <input id="receipt" name="receipt" type="file" accept="image/*,.pdf" onChange={handleReceiptChange} />
-              <small className="field-help">
-                Attached file: {formData.receiptName || 'None'} • {formatReceiptSize(formData.receiptSize)}
-              </small>
-            </div>
-
-            <div className="field-span-2 form-actions">
-              <button type="submit" className="primary-btn" disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save expense'}
-              </button>
-              <button type="button" className="ghost-btn" onClick={resetForm}>
-                Reset form
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div className="panel-card insights-card">
-          <div className="section-heading">
-            <div>
-              <h2>Currency quick view</h2>
-              <p>Reference values based on the mock exchange table used by the app.</p>
-            </div>
-          </div>
-
-          <div className="rate-list">
-            {Object.entries(currencies).map(([currencyCode, rate]) => (
-              <div className="rate-item" key={currencyCode}>
-                <strong>{currencyCode}</strong>
-                <span>1 {currencyCode} ≈ ₱{compactNumberFormatter.format(rate)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="panel-card table-card">
-        <div className="section-heading section-heading-wrap">
+      <main className="dashboard-main">
+        <header className="dashboard-header">
           <div>
-            <h2>Expense history</h2>
-            <p>Review spending history, filter records, and remove entries you no longer need.</p>
+            <h1>Dashboard</h1>
+            <p className="header-date">
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
           </div>
 
-          <div className="filters-row">
-            <input
-              type="search"
-              placeholder="Search title or notes"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-
-            <select value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)}>
-              <option value="all">All months</option>
-              {availableMonths.map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
-            </select>
-
-            <select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)}>
-              <option value="all">All categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+          <div className="header-actions">
+            <button className="avatar-btn" onClick={handleLogout} title="Logout">
+              {getInitials()}
+            </button>
           </div>
+        </header>
+
+        <div className="dashboard-content">
+          <div className="main-column">
+            <section className="balance-card">
+              <div className="balance-header">
+                <span className="balance-label">💰 Current Balance</span>
+                <div className="balance-controls">
+                  <button className="btn btn-outline">+ Add Expense</button>
+                  <button className="btn btn-success">+ Add Funds</button>
+                </div>
+              </div>
+
+              <div className="balance-display">
+                <h2 className="balance-amount">₱ {totalBalance.toFixed(2)}</h2>
+                <p className="balance-usd">
+                  ≈ {formatCurrency(convertCurrency(totalBalance, 'USD'), 'USD')}
+                </p>
+              </div>
+
+              <div className="balance-footer">
+                <div className="currency-selector">
+                  <label>PHP</label>
+                  <select value={displayCurrency} onChange={(e) => setDisplayCurrency(e.target.value)}>
+                    <option value="PHP">PHP</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="JPY">JPY</option>
+                    <option value="GBP">GBP</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            <section className="recent-expenses-section">
+              <h3>Recent Expenses</h3>
+
+              {isLoading ? (
+                <div className="loading-state">Loading expenses...</div>
+              ) : expenses.length === 0 ? (
+                <div className="empty-state">No expenses yet. Add one to get started!</div>
+              ) : (
+                <>
+                  <table className="expenses-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Receipt</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedExpenses.map((expense) => (
+                        <tr key={expense.id}>
+                          <td>{expense.expenseDate}</td>
+                          <td>
+                            <span className="category-badge">{expense.category}</span>
+                          </td>
+                          <td className="description-cell">{expense.title}</td>
+                          <td className="amount-cell">{formatCurrency(expense.amountPhp, 'PHP')}</td>
+                          <td className="receipt-cell">
+                            {expense.receiptName ? (
+                              <button className="receipt-btn" title="View receipt">
+                                👁 view
+                              </button>
+                            ) : (
+                              <span>—</span>
+                            )}
+                          </td>
+                          <td>
+                            <button
+                              className="delete-btn"
+                              onClick={() => handleDelete(expense.id)}
+                              title="Delete"
+                            >
+                              🗑
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div className="pagination">
+                    <span className="pagination-info">
+                      Showing {startIdx + 1} of {sortedExpenses.length} expenses
+                    </span>
+
+                    <div className="pagination-controls">
+                      <button
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        ← Prev
+                      </button>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={page === currentPage ? 'active' : ''}
+                        >
+                          {page}
+                        </button>
+                      ))}
+
+                      <button
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </section>
+          </div>
+
+          <aside className="sidebar-column">
+            <div className="stats-card">
+              <div className="stat-item">
+                <label>This Month</label>
+                <strong className="stat-amount" style={{ color: '#d9534f' }}>
+                  {formatCurrency(monthSpent, 'PHP')}
+                </strong>
+              </div>
+
+              <div className="stat-item">
+                <label>Saved</label>
+                <strong className="stat-amount" style={{ color: '#5cb85c' }}>
+                  {formatCurrency(saved, 'PHP')}
+                </strong>
+              </div>
+
+              <div className="stat-item">
+                <label>{receiptCount} files</label>
+                <strong className="stat-label">Receipts</strong>
+              </div>
+            </div>
+
+            <div className="chart-card">
+              <h4>Spending by Category</h4>
+              {topSpending.length > 0 ? (
+                <>
+                  <div className="chart-wrapper">
+                    <PieChart data={topSpending} total={topSpending.reduce((s, c) => s + c.value, 0)} />
+                  </div>
+                  <div className="chart-total">
+                    Total: <strong>{formatCurrency(topSpending.reduce((s, c) => s + c.value, 0), 'PHP')}</strong>
+                  </div>
+                </>
+              ) : (
+                <div className="empty-state">No spending data yet.</div>
+              )}
+            </div>
+          </aside>
         </div>
 
-        {isLoading ? (
-          <div className="empty-state">Loading your expenses...</div>
-        ) : filteredExpenses.length === 0 ? (
-          <div className="empty-state">No expenses found yet. Add your first record above.</div>
-        ) : (
-          <div className="expense-list">
-            {filteredExpenses.map((expense) => (
-              <article className="expense-item" key={expense.id}>
-                <div className="expense-main">
-                  <div className="expense-title-row">
-                    <h3>{expense.title}</h3>
-                    <span className="expense-badge">{expense.category}</span>
-                  </div>
-
-                  <p className="expense-meta">
-                    {expense.expenseDate} • {formatDisplayAmount(expense.amount, expense.currency)} •{' '}
-                    <strong>{currencyFormatter.format(expense.amountPhp)}</strong>
-                  </p>
-
-                  <p className="expense-notes">{expense.notes || 'No notes added.'}</p>
-
-                  <p className="receipt-meta">
-                    Receipt: {expense.receiptName || 'Not attached'}
-                    {expense.receiptName ? ` • ${formatReceiptSize(expense.receiptSize)}` : ''}
-                  </p>
-                </div>
-
-                <button type="button" className="danger-btn" onClick={() => handleDelete(expense.id)}>
-                  Delete
-                </button>
-              </article>
-            ))}
+        {error && (
+          <div className="error-banner">
+            {error}
+            <button onClick={() => setError('')}>✕</button>
           </div>
         )}
-      </section>
+      </main>
     </div>
   )
+
 }
 
 export default Dashboard
