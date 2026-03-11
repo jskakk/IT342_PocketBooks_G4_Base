@@ -20,6 +20,43 @@
       "email": "testuser@gmail.com",
       "passwordHash": "$2b$12$0itxixL2mdAV9ZvwcIOCKu2IFky5pImx8ma56Gw4rsusunsk7fpr6",
       "createdAt": "2026-03-04T09:48:34.515Z"
+    },
+    {
+      "id": "dc0bc490-fabd-44de-b6b7-88a1f6a53806",
+      "name": "Jascha Base",
+      "email": "basejascha@gmail.com",
+      "passwordHash": "$2b$12$tKovulyGYKCdMQKfkgJLp.jmVgTwART1aYG46VcwRfY4oepnVftzO",
+      "createdAt": "2026-03-11T11:45:31.282Z"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "4ea0b984-460b-4af3-b5fb-2eb27abf45aa",
+      "userId": "76b0e7a7-016b-44a8-aa83-b0466257ff71",
+      "title": "Lunch at canteen",
+      "category": "Food",
+      "amount": 120,
+      "currency": "PHP",
+      "amountPhp": 120,
+      "expenseDate": "2026-03-10",
+      "notes": "Rice meal and juice",
+      "receiptName": "canteen-receipt.jpg",
+      "receiptSize": 184320,
+      "createdAt": "2026-03-10T05:00:00.000Z"
+    },
+    {
+      "id": "8f348fc1-f680-4689-b212-bdcb9f8e7a20",
+      "userId": "76b0e7a7-016b-44a8-aa83-b0466257ff71",
+      "title": "Jeepney fare",
+      "category": "Transportation",
+      "amount": 24,
+      "currency": "PHP",
+      "amountPhp": 24,
+      "expenseDate": "2026-03-09",
+      "notes": "Round trip to campus",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-03-09T02:30:00.000Z"
     }
   ]
 }
