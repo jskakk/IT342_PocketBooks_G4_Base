@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
+import { supabase } from '../lib/supabase'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
@@ -15,6 +16,14 @@ const initialRegister = {
   password: '',
 }
 
+const formatSupabaseError = (error, fallbackMessage) => {
+  const raw = (error?.message || '').toLowerCase()
+  if (raw.includes('rate limit') || raw.includes('too many requests')) {
+    return 'Too many signup attempts. Please wait a few minutes before trying again.'
+  }
+  return error?.message || fallbackMessage
+}
+
 function AuthPage({ mode }) {
   const navigate = useNavigate()
   const isRegister = mode === 'register'
@@ -23,6 +32,40 @@ function AuthPage({ mode }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const syncLocalUser = async ({ name, email, password }) => {
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    })
+
+    // If user already exists locally, this is still a successful sync path.
+    if (response.status === 409) {
+      return true
+    }
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.message || 'Failed to sync local user profile.')
+    }
+
+    return true
+  }
+
+  const loginLocalUser = async ({ email, password }) => {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    return response.json()
+  }
 
   const onChange = (event) => {
     const { name, value } = event.target
@@ -55,27 +98,100 @@ function AuthPage({ mode }) {
 
     try {
       setIsSubmitting(true)
-      const endpoint = isRegister ? '/api/register' : '/api/login'
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-      if (!response.ok) {
-        setError(data.message || 'Request failed. Please try again.')
+      if (!supabase) {
+        setError('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.')
         return
       }
 
       if (isRegister) {
-        setSuccess('Account created successfully. You can now sign in.')
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: formData.email.trim(),
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.name.trim(),
+            },
+          },
+        })
+
+        if (signUpError) {
+          setError(formatSupabaseError(signUpError, 'Sign up failed. Please try again.'))
+          return
+        }
+
+        // Mirror auth users into public.users for app profile visibility.
+        const { error: profileError } = await supabase.from('users').upsert(
+          {
+            full_name: formData.name.trim(),
+            email: formData.email.trim().toLowerCase(),
+            password_hash: 'managed_by_supabase_auth',
+            role: 'ROLE_STUDENT',
+            balance: 0,
+            created_at: new Date().toISOString(),
+          },
+          { onConflict: 'email' },
+        )
+
+        if (profileError) {
+          console.warn('Profile mirror to public.users failed:', profileError.message)
+        }
+
+        await syncLocalUser({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+        })
+
+        setSuccess('Account created in Supabase. You can now sign in.')
         setFormData(initialRegister)
         return
       }
 
-      localStorage.setItem('authUser', JSON.stringify(data.user))
-      localStorage.setItem('authToken', data.token)
+      const { data: supabaseData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim(),
+        password: formData.password,
+      })
+
+      if (signInError) {
+        setError(formatSupabaseError(signInError, 'Sign in failed. Please try again.'))
+        return
+      }
+
+      let localLoginData = await loginLocalUser({
+        email: formData.email.trim(),
+        password: formData.password,
+      })
+
+      if (!localLoginData) {
+        await syncLocalUser({
+          name:
+            supabaseData.user?.user_metadata?.full_name ||
+            supabaseData.user?.email?.split('@')[0] ||
+            'Student',
+          email: formData.email.trim(),
+          password: formData.password,
+        })
+
+        localLoginData = await loginLocalUser({
+          email: formData.email.trim(),
+          password: formData.password,
+        })
+      }
+
+      const fallbackUser = {
+        id: supabaseData.user?.id,
+        name:
+          supabaseData.user?.user_metadata?.full_name ||
+          supabaseData.user?.email?.split('@')[0] ||
+          'Student',
+        email: supabaseData.user?.email,
+      }
+
+      localStorage.setItem('authUser', JSON.stringify(localLoginData?.user || fallbackUser))
+      localStorage.setItem(
+        'authToken',
+        localLoginData?.token || `demo-token-${supabaseData.user?.id || ''}`,
+      )
       navigate('/dashboard')
     } catch {
       setError('Could not connect to the server. Please try again.')
@@ -264,5 +380,4 @@ function AuthPage({ mode }) {
     </GoogleOAuthProvider>
   )
 }
-
 export default AuthPage
