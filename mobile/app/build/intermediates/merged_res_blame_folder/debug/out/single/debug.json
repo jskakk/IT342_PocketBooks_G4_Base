@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/mipmap-anydpi-v33_ic_launcher.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/mipmap-anydpi-v33/ic_launcher.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_home.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_home.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_register.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_login.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_login.xml"
+    }
+]
