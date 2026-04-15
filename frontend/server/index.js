@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import bcrypt from 'bcryptjs'
 import cors from 'cors'
 import express from 'express'
@@ -5,10 +6,18 @@ import { randomUUID } from 'node:crypto'
 import { Low } from 'lowdb'
 import { JSONFile } from 'lowdb/node'
 import jwt from 'jsonwebtoken'
+import { createClient } from '@supabase/supabase-js'
 
 const app = express()
 const PORT = 4000
 const JWT_SECRET = 'pocketbooks_jwt_secret_key_2026'
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
+const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || ''
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
+
+const supabaseKey = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY
+const supabase = SUPABASE_URL && supabaseKey ? createClient(SUPABASE_URL, supabaseKey) : null
 
 const DEFAULT_CURRENCY = 'PHP'
 const EXCHANGE_RATES = {
@@ -114,6 +123,131 @@ const sanitizeUser = (user) => ({
   createdAt: user.createdAt,
 })
 
+const mapSupabaseExpenseToApi = (row) => ({
+  id: row.id,
+  userId: row.user_id ?? row.userId,
+  title: row.title,
+  category: row.category,
+  amount: row.amount,
+  currency: row.currency,
+  amountPhp: row.amount_php ?? row.amountPhp,
+  expenseDate: row.expense_date ?? row.expenseDate,
+  notes: row.notes || '',
+  receiptName: row.receipt_name ?? row.receiptName ?? '',
+  receiptSize: row.receipt_size ?? row.receiptSize ?? 0,
+  createdAt: row.created_at ?? row.createdAt,
+})
+
+const fetchSupabaseExpenses = async (userId) => {
+  if (!supabase) {
+    return null
+  }
+
+  const snakeQuery = await supabase
+    .from('expenses')
+    .select(
+      'id, user_id, title, category, amount, currency, amount_php, expense_date, notes, receipt_name, receipt_size, created_at',
+    )
+    .eq('user_id', userId)
+    .order('expense_date', { ascending: false })
+
+  if (!snakeQuery.error) {
+    return (snakeQuery.data || []).map(mapSupabaseExpenseToApi)
+  }
+
+  const camelQuery = await supabase
+    .from('expenses')
+    .select(
+      'id, userId, title, category, amount, currency, amountPhp, expenseDate, notes, receiptName, receiptSize, createdAt',
+    )
+    .eq('userId', userId)
+    .order('expenseDate', { ascending: false })
+
+  if (camelQuery.error) {
+    throw camelQuery.error
+  }
+
+  return (camelQuery.data || []).map(mapSupabaseExpenseToApi)
+}
+
+const upsertSupabaseExpense = async (expense) => {
+  if (!supabase) {
+    return
+  }
+
+  const snakePayload = {
+    id: expense.id,
+    user_id: expense.userId,
+    title: expense.title,
+    category: expense.category,
+    amount: expense.amount,
+    currency: expense.currency,
+    amount_php: expense.amountPhp,
+    expense_date: expense.expenseDate,
+    notes: expense.notes,
+    receipt_name: expense.receiptName,
+    receipt_size: expense.receiptSize,
+    created_at: expense.createdAt,
+  }
+
+  const snakeInsert = await supabase.from('expenses').upsert(snakePayload, {
+    onConflict: 'id',
+  })
+
+  if (!snakeInsert.error) {
+    return
+  }
+
+  const camelPayload = {
+    id: expense.id,
+    userId: expense.userId,
+    title: expense.title,
+    category: expense.category,
+    amount: expense.amount,
+    currency: expense.currency,
+    amountPhp: expense.amountPhp,
+    expenseDate: expense.expenseDate,
+    notes: expense.notes,
+    receiptName: expense.receiptName,
+    receiptSize: expense.receiptSize,
+    createdAt: expense.createdAt,
+  }
+
+  const camelInsert = await supabase.from('expenses').upsert(camelPayload, {
+    onConflict: 'id',
+  })
+
+  if (camelInsert.error) {
+    throw camelInsert.error
+  }
+}
+
+const deleteSupabaseExpense = async (expenseId, userId) => {
+  if (!supabase) {
+    return
+  }
+
+  const snakeDelete = await supabase
+    .from('expenses')
+    .delete()
+    .eq('id', expenseId)
+    .eq('user_id', userId)
+
+  if (!snakeDelete.error) {
+    return
+  }
+
+  const camelDelete = await supabase
+    .from('expenses')
+    .delete()
+    .eq('id', expenseId)
+    .eq('userId', userId)
+
+  if (camelDelete.error) {
+    throw camelDelete.error
+  }
+}
+
 const initializeDb = async () => {
   await db.read()
   db.data ||= { users: [], expenses: [] }
@@ -127,6 +261,7 @@ app.get('/api/health', (_, res) => {
     ok: true,
     currencies: EXCHANGE_RATES,
     categories: EXPENSE_CATEGORIES,
+    supabaseSyncEnabled: Boolean(supabase),
   })
 })
 
@@ -270,12 +405,26 @@ app.get('/api/expenses', (req, res) => {
     })
   }
 
-  const expenses = db.data.expenses
-    .filter((expense) => expense.userId === user.id)
-    .sort((left, right) => new Date(right.expenseDate) - new Date(left.expenseDate))
-    .map(sanitizeExpense)
+  const getExpenses = async () => {
+    try {
+      const supabaseExpenses = await fetchSupabaseExpenses(user.id)
 
-  return res.status(200).json({ expenses })
+      if (supabaseExpenses) {
+        return res.status(200).json({ expenses: supabaseExpenses.map(sanitizeExpense) })
+      }
+    } catch (error) {
+      console.warn('Supabase expense fetch failed. Falling back to local db:', error.message)
+    }
+
+    const expenses = db.data.expenses
+      .filter((expense) => expense.userId === user.id)
+      .sort((left, right) => new Date(right.expenseDate) - new Date(left.expenseDate))
+      .map(sanitizeExpense)
+
+    return res.status(200).json({ expenses })
+  }
+
+  getExpenses()
 })
 
 app.post('/api/expenses', async (req, res) => {
@@ -304,6 +453,12 @@ app.post('/api/expenses', async (req, res) => {
     })
   }
 
+  if (title.trim().length > 80) {
+    return res.status(400).json({
+      message: 'Expense title must be 80 characters or less.',
+    })
+  }
+
   const normalizedCategory = EXPENSE_CATEGORIES.includes(category) ? category : 'Other'
   const normalizedCurrency = normalizeCurrency(currency)
   const amountPhp = convertToPhp(amount, normalizedCurrency)
@@ -315,6 +470,40 @@ app.post('/api/expenses', async (req, res) => {
   }
 
   const normalizedDate = expenseDate || new Date().toISOString().slice(0, 10)
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/
+
+  if (!datePattern.test(normalizedDate)) {
+    return res.status(400).json({
+      message: 'Expense date must use YYYY-MM-DD format.',
+    })
+  }
+
+  const parsedDate = new Date(normalizedDate)
+  if (Number.isNaN(parsedDate.getTime())) {
+    return res.status(400).json({
+      message: 'Expense date is invalid.',
+    })
+  }
+
+  if (notes?.trim()?.length > 240) {
+    return res.status(400).json({
+      message: 'Notes must be 240 characters or less.',
+    })
+  }
+
+  const safeReceiptSize = Number(receiptSize) || 0
+  if (safeReceiptSize > 2 * 1024 * 1024) {
+    return res.status(400).json({
+      message: 'Receipt file must be 2 MB or less.',
+    })
+  }
+
+  if (receiptName?.trim()?.length > 120) {
+    return res.status(400).json({
+      message: 'Receipt file name must be 120 characters or less.',
+    })
+  }
+
   const expense = {
     id: randomUUID(),
     userId: user.id,
@@ -326,8 +515,20 @@ app.post('/api/expenses', async (req, res) => {
     expenseDate: normalizedDate,
     notes: notes?.trim() || '',
     receiptName: receiptName?.trim() || '',
-    receiptSize: Number(receiptSize) || 0,
+    receiptSize: safeReceiptSize,
     createdAt: new Date().toISOString(),
+  }
+
+  if (supabase) {
+    try {
+      await upsertSupabaseExpense(expense)
+    } catch (error) {
+      return res.status(502).json({
+        message:
+          'Could not save expense to Supabase. Verify SUPABASE_URL, keys, and expenses table columns.',
+        details: error.message,
+      })
+    }
   }
 
   db.data.expenses.push(expense)
@@ -356,6 +557,18 @@ app.delete('/api/expenses/:expenseId', async (req, res) => {
     return res.status(404).json({
       message: 'Expense not found.',
     })
+  }
+
+  if (supabase) {
+    try {
+      await deleteSupabaseExpense(req.params.expenseId, user.id)
+    } catch (error) {
+      return res.status(502).json({
+        message:
+          'Could not delete expense from Supabase. Verify SUPABASE_URL, keys, and expenses table columns.',
+        details: error.message,
+      })
+    }
   }
 
   db.data.expenses.splice(expenseIndex, 1)

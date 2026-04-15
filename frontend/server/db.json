@@ -26,7 +26,9 @@
       "name": "Jascha Base",
       "email": "basejascha@gmail.com",
       "passwordHash": "$2b$12$tKovulyGYKCdMQKfkgJLp.jmVgTwART1aYG46VcwRfY4oepnVftzO",
-      "createdAt": "2026-03-11T11:45:31.282Z"
+      "createdAt": "2026-03-11T11:45:31.282Z",
+      "googleId": "105428528925124386605",
+      "authProvider": "google"
     },
     {
       "id": "google-user-demo-001",
@@ -35,6 +37,20 @@
       "googleId": "110169234559156813851",
       "authProvider": "google",
       "createdAt": "2026-03-11T12:00:00.000Z"
+    },
+    {
+      "id": "5dfc50a0-d964-4bc0-a842-c385c55229af",
+      "name": "Test User2",
+      "email": "testuser2@gmail.com",
+      "passwordHash": "$2b$12$Ba6c23qCJ2NrlHBLqlH.8uojUVey02uo/tfWNraTwM6/0pv5.hbTq",
+      "createdAt": "2026-03-22T12:30:05.730Z"
+    },
+    {
+      "id": "9d8fad3d-5e6e-435f-a05e-245a0ad45812",
+      "name": "Jascha Base",
+      "email": "jaschabase@gmail.com",
+      "passwordHash": "$2b$12$yjdOlFu5lUppdI/M9GNePOF6s2faUfJ0nyGy8Vy8qY.07blunLnem",
+      "createdAt": "2026-04-06T16:16:40.859Z"
     }
   ],
   "expenses": [
@@ -65,6 +81,76 @@
       "receiptName": "",
       "receiptSize": 0,
       "createdAt": "2026-03-09T02:30:00.000Z"
+    },
+    {
+      "id": "a4a20cfc-7372-490e-8679-816b500acc41",
+      "userId": "dc0bc490-fabd-44de-b6b7-88a1f6a53806",
+      "title": "Lunch at Canteen",
+      "category": "Food",
+      "amount": 2000,
+      "currency": "PHP",
+      "amountPhp": 2000,
+      "expenseDate": "2026-04-15",
+      "notes": "SIOMAI RICE\nITLOG",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-04-15T13:56:51.117Z"
+    },
+    {
+      "id": "b1170099-45d1-4353-ae3a-ac35bbadd172",
+      "userId": "dc0bc490-fabd-44de-b6b7-88a1f6a53806",
+      "title": "EJeep",
+      "category": "Transportation",
+      "amount": 24.99,
+      "currency": "PHP",
+      "amountPhp": 24.99,
+      "expenseDate": "2026-04-15",
+      "notes": "",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-04-15T14:12:05.142Z"
+    },
+    {
+      "id": "4cb43de3-cb48-459a-9696-b3734f33d579",
+      "userId": "dc0bc490-fabd-44de-b6b7-88a1f6a53806",
+      "title": "Prefinal Tutition",
+      "category": "School",
+      "amount": 14000,
+      "currency": "PHP",
+      "amountPhp": 14000,
+      "expenseDate": "2026-04-15",
+      "notes": "T_T",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-04-15T14:14:03.503Z"
+    },
+    {
+      "id": "1e822f9d-7adb-4a4f-9be2-2311d7a2767a",
+      "userId": "dc0bc490-fabd-44de-b6b7-88a1f6a53806",
+      "title": "Midterm",
+      "category": "Food",
+      "amount": 13500,
+      "currency": "PHP",
+      "amountPhp": 13500,
+      "expenseDate": "2026-04-15",
+      "notes": "Rech milyoner",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-04-15T14:15:45.533Z"
+    },
+    {
+      "id": "d5aa2b7a-55b8-462c-aca3-857fb5760a78",
+      "userId": "dc0bc490-fabd-44de-b6b7-88a1f6a53806",
+      "title": "Lunch",
+      "category": "Food",
+      "amount": 1500,
+      "currency": "PHP",
+      "amountPhp": 1500,
+      "expenseDate": "2026-04-15",
+      "notes": "",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-04-15T14:18:42.189Z"
     }
   ]
 }
