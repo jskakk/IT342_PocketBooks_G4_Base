@@ -32,6 +32,16 @@ const usdFormatter = new Intl.NumberFormat('en-US', {
   currency: 'USD',
 })
 
+const initialExpenseForm = {
+  title: '',
+  category: fallbackCategories[0],
+  amount: '',
+  currency: 'PHP',
+  expenseDate: new Date().toISOString().slice(0, 10),
+  notes: '',
+  receiptFile: null,
+}
+
 function Dashboard() {
   const navigate = useNavigate()
 
@@ -48,8 +58,13 @@ function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [displayCurrency, setDisplayCurrency] = useState('PHP')
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
+  const [formError, setFormError] = useState('')
+  const [expenseForm, setExpenseForm] = useState(initialExpenseForm)
 
   useEffect(() => {
     if (!user) {
@@ -67,11 +82,14 @@ function Dashboard() {
         setIsLoading(true)
         setError('')
 
-        const expensesResponse = await fetch(`/api/expenses?userId=${user.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const [expensesResponse, metaResponse] = await Promise.all([
+          fetch(`/api/expenses?userId=${user.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch('/api/meta'),
+        ])
 
         const expenseData = await expensesResponse.json()
         if (!expensesResponse.ok) {
@@ -79,6 +97,20 @@ function Dashboard() {
         }
 
         setExpenses(expenseData.expenses || [])
+
+        if (metaResponse.ok) {
+          const metaData = await metaResponse.json()
+          const serverCurrencies = metaData.currencies || fallbackCurrencies
+          const serverCategories = metaData.categories || fallbackCategories
+
+          setCurrencies(serverCurrencies)
+          setCategories(serverCategories)
+          setExpenseForm((prev) => ({
+            ...prev,
+            category: serverCategories[0] || fallbackCategories[0],
+            currency: metaData.defaultCurrency || 'PHP',
+          }))
+        }
       } catch (loadError) {
         setError(loadError.message || 'Could not load dashboard data.')
       } finally {
@@ -120,8 +152,16 @@ function Dashboard() {
   const paginatedExpenses = sortedExpenses.slice(startIdx, startIdx + itemsPerPage)
 
   const convertCurrency = (php, toCurrency) => {
-    if (toCurrency === 'PHP') return php
-    return php / currencies[toCurrency]
+    if (toCurrency === 'PHP') {
+      return php
+    }
+
+    const rate = currencies[toCurrency]
+    if (!rate) {
+      return php
+    }
+
+    return php / rate
   }
 
   const formatCurrency = (amount, curr) => {
@@ -141,8 +181,143 @@ function Dashboard() {
       .toUpperCase()
   }
 
-  const handleDelete = async (expenseId) => {
+  const validateExpense = () => {
+    if (!expenseForm.title.trim()) {
+      return 'Expense title is required.'
+    }
+
+    if (expenseForm.title.trim().length > 80) {
+      return 'Expense title should be 80 characters or less.'
+    }
+
+    const parsedAmount = Number(expenseForm.amount)
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      return 'Amount must be greater than zero.'
+    }
+
+    if (!categories.includes(expenseForm.category)) {
+      return 'Please select a valid category.'
+    }
+
+    if (!currencies[expenseForm.currency]) {
+      return 'Please select a valid currency.'
+    }
+
+    if (!expenseForm.expenseDate) {
+      return 'Expense date is required.'
+    }
+
+    const parsedDate = new Date(expenseForm.expenseDate)
+    if (Number.isNaN(parsedDate.getTime())) {
+      return 'Expense date is invalid.'
+    }
+
+    if (expenseForm.notes.trim().length > 240) {
+      return 'Notes must be 240 characters or less.'
+    }
+
+    if (expenseForm.receiptFile && expenseForm.receiptFile.size > 2 * 1024 * 1024) {
+      return 'Receipt file must be 2 MB or less.'
+    }
+
+    return ''
+  }
+
+  const resetAddExpenseForm = () => {
+    setExpenseForm({
+      ...initialExpenseForm,
+      category: categories[0] || fallbackCategories[0],
+      currency: 'PHP',
+      expenseDate: new Date().toISOString().slice(0, 10),
+    })
+    setFormError('')
+  }
+
+  const handleExpenseInputChange = (event) => {
+    const { name, value } = event.target
+    setExpenseForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleReceiptChange = (event) => {
+    const file = event.target.files?.[0] || null
+    setExpenseForm((prev) => ({
+      ...prev,
+      receiptFile: file,
+    }))
+  }
+
+  const handleAddExpenseClick = () => {
+    setError('')
+    setSuccess('')
+    resetAddExpenseForm()
+    setIsAddExpenseOpen(true)
+  }
+
+  const handleExpenseSubmit = async (event) => {
+    event.preventDefault()
+    setFormError('')
+    setError('')
+    setSuccess('')
+
+    const validationMessage = validateExpense()
+    if (validationMessage) {
+      setFormError(validationMessage)
+      return
+    }
+
     try {
+      setIsSubmitting(true)
+
+      const payload = {
+        title: expenseForm.title.trim(),
+        category: expenseForm.category,
+        amount: Number(expenseForm.amount),
+        currency: expenseForm.currency,
+        expenseDate: expenseForm.expenseDate,
+        notes: expenseForm.notes.trim(),
+        receiptName: expenseForm.receiptFile?.name || '',
+        receiptSize: expenseForm.receiptFile?.size || 0,
+      }
+
+      const response = await fetch(`/api/expenses?userId=${user.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create expense.')
+      }
+
+      setExpenses((prev) => [data.expense, ...prev])
+      setSuccess('Expense added successfully.')
+      setIsAddExpenseOpen(false)
+      resetAddExpenseForm()
+      setCurrentPage(1)
+    } catch (submitError) {
+      setFormError(submitError.message || 'Could not create expense.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (expenseId) => {
+    const confirmed = window.confirm('Delete this expense record?')
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setError('')
+      setSuccess('')
+
       const response = await fetch(`/api/expenses/${expenseId}?userId=${user.id}`, {
         method: 'DELETE',
         headers: {
@@ -151,10 +326,12 @@ function Dashboard() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete expense.')
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.message || 'Failed to delete expense.')
       }
 
       setExpenses((prev) => prev.filter((e) => e.id !== expenseId))
+      setSuccess('Expense deleted successfully.')
       if (paginatedExpenses.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1)
       }
@@ -200,13 +377,22 @@ function Dashboard() {
               <div className="balance-header">
                 <span className="balance-label">💰 Current Balance</span>
                 <div className="balance-controls">
-                  <button className="btn btn-outline">+ Add Expense</button>
-                  <button className="btn btn-success">+ Add Funds</button>
+                  <button className="btn btn-outline" onClick={handleAddExpenseClick}>
+                    + Add Expense
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => setSuccess('Add funds feature is planned for the next phase.')}
+                  >
+                    + Add Funds
+                  </button>
                 </div>
               </div>
 
               <div className="balance-display">
-                <h2 className="balance-amount">₱ {totalBalance.toFixed(2)}</h2>
+                <h2 className="balance-amount">
+                  {formatCurrency(convertCurrency(totalBalance, displayCurrency), displayCurrency)}
+                </h2>
                 <p className="balance-usd">
                   ≈ {formatCurrency(convertCurrency(totalBalance, 'USD'), 'USD')}
                 </p>
@@ -214,17 +400,133 @@ function Dashboard() {
 
               <div className="balance-footer">
                 <div className="currency-selector">
-                  <label>PHP</label>
+                  <label>{displayCurrency}</label>
                   <select value={displayCurrency} onChange={(e) => setDisplayCurrency(e.target.value)}>
-                    <option value="PHP">PHP</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="JPY">JPY</option>
-                    <option value="GBP">GBP</option>
+                    {Object.keys(currencies).map((currencyCode) => (
+                      <option key={currencyCode} value={currencyCode}>
+                        {currencyCode}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
             </section>
+
+            {isAddExpenseOpen && (
+              <section className="add-expense-section">
+                <h3>Add New Expense</h3>
+
+                {formError && <div className="inline-message inline-message-error">{formError}</div>}
+
+                <form className="add-expense-form" onSubmit={handleExpenseSubmit}>
+                  <div className="form-grid">
+                    <div className="form-field span-2">
+                      <label htmlFor="title">Expense Title</label>
+                      <input
+                        id="title"
+                        name="title"
+                        placeholder="e.g. Lunch at canteen"
+                        value={expenseForm.title}
+                        onChange={handleExpenseInputChange}
+                        maxLength={80}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="category">Category</label>
+                      <select
+                        id="category"
+                        name="category"
+                        value={expenseForm.category}
+                        onChange={handleExpenseInputChange}
+                      >
+                        {categories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="currency">Currency</label>
+                      <select
+                        id="currency"
+                        name="currency"
+                        value={expenseForm.currency}
+                        onChange={handleExpenseInputChange}
+                      >
+                        {Object.keys(currencies).map((currencyCode) => (
+                          <option key={currencyCode} value={currencyCode}>
+                            {currencyCode}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="amount">Amount</label>
+                      <input
+                        id="amount"
+                        name="amount"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={expenseForm.amount}
+                        onChange={handleExpenseInputChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="expenseDate">Expense Date</label>
+                      <input
+                        id="expenseDate"
+                        name="expenseDate"
+                        type="date"
+                        value={expenseForm.expenseDate}
+                        onChange={handleExpenseInputChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-field span-2">
+                      <label htmlFor="notes">Notes (Optional)</label>
+                      <textarea
+                        id="notes"
+                        name="notes"
+                        placeholder="Any additional details..."
+                        value={expenseForm.notes}
+                        onChange={handleExpenseInputChange}
+                        maxLength={240}
+                      />
+                    </div>
+
+                    <div className="form-field span-2">
+                      <label htmlFor="receiptFile">Receipt File (Optional, max 2MB)</label>
+                      <input
+                        id="receiptFile"
+                        name="receiptFile"
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={handleReceiptChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="add-expense-actions">
+                    <button className="btn btn-outline" type="button" onClick={() => setIsAddExpenseOpen(false)}>
+                      Cancel
+                    </button>
+                    <button className="btn btn-success" type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? 'Saving...' : 'Save Expense'}
+                    </button>
+                  </div>
+                </form>
+              </section>
+            )}
 
             <section className="recent-expenses-section">
               <h3>Recent Expenses</h3>
@@ -267,6 +569,7 @@ function Dashboard() {
                           <td>
                             <button
                               className="delete-btn"
+                              type="button"
                               onClick={() => handleDelete(expense.id)}
                               title="Delete"
                             >
@@ -319,14 +622,14 @@ function Dashboard() {
               <div className="stat-item">
                 <label>This Month</label>
                 <strong className="stat-amount" style={{ color: '#d9534f' }}>
-                  {formatCurrency(monthSpent, 'PHP')}
+                  {formatCurrency(convertCurrency(monthSpent, displayCurrency), displayCurrency)}
                 </strong>
               </div>
 
               <div className="stat-item">
                 <label>Saved</label>
                 <strong className="stat-amount" style={{ color: '#5cb85c' }}>
-                  {formatCurrency(saved, 'PHP')}
+                  {formatCurrency(convertCurrency(saved, displayCurrency), displayCurrency)}
                 </strong>
               </div>
 
@@ -357,7 +660,18 @@ function Dashboard() {
         {error && (
           <div className="error-banner">
             {error}
-            <button onClick={() => setError('')}>✕</button>
+            <button type="button" onClick={() => setError('')}>
+              ✕
+            </button>
+          </div>
+        )}
+
+        {success && (
+          <div className="success-banner">
+            {success}
+            <button type="button" onClick={() => setSuccess('')}>
+              ✕
+            </button>
           </div>
         )}
       </main>
