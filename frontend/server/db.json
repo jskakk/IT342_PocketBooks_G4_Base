@@ -26,7 +26,9 @@
       "name": "Jascha Base",
       "email": "basejascha@gmail.com",
       "passwordHash": "$2b$12$tKovulyGYKCdMQKfkgJLp.jmVgTwART1aYG46VcwRfY4oepnVftzO",
-      "createdAt": "2026-03-11T11:45:31.282Z"
+      "createdAt": "2026-03-11T11:45:31.282Z",
+      "googleId": "105428528925124386605",
+      "authProvider": "google"
     },
     {
       "id": "google-user-demo-001",
@@ -34,7 +36,46 @@
       "email": "demo.google@example.com",
       "googleId": "110169234559156813851",
       "authProvider": "google",
+      "balance": 4550,
       "createdAt": "2026-03-11T12:00:00.000Z"
+    },
+    {
+      "id": "8cee2fbd-7702-416f-88f8-0aa1f287b939",
+      "name": "Slice Test",
+      "email": "slicetest@example.com",
+      "passwordHash": "$2b$12$jjbZmUy4zkXUb5mdzjTaWuwinyJxL7.1Ycf2vaAlhlxiHFeOEKNm2",
+      "createdAt": "2026-05-09T09:30:42.608Z"
+    },
+    {
+      "id": "4b8f7392-0ea6-4ac4-a7f9-1654b53960ff",
+      "name": "Google Test",
+      "email": "googletest@example.com",
+      "googleId": "google-user-1",
+      "authProvider": "google",
+      "createdAt": "2026-05-09T09:35:18.919Z"
+    },
+    {
+      "id": "331ed5bc-696a-4ca5-8a7a-4f0912c48b72",
+      "name": "Test User",
+      "email": "test@example.com",
+      "googleId": "google-123",
+      "authProvider": "google",
+      "createdAt": "2026-05-09T09:48:25.340Z"
+    },
+    {
+      "id": "09213887-6696-40a5-8a32-9b1607de0b35",
+      "name": "jaschabase",
+      "email": "testuse3r@gmail.com",
+      "passwordHash": "$2b$12$M8tBN283P9AXdotZAFL5EuoIYthUF6dOixNbF6WZgHtBwQE06Q3MW",
+      "createdAt": "2026-05-09T15:41:01.494Z"
+    },
+    {
+      "id": "778e8afa-fe8b-4009-bbc5-b6e0f6b70c46",
+      "name": "testtest",
+      "email": "testus2r@gmail.com",
+      "passwordHash": "$2b$12$9hEsx.sCTeFZdOjfA.n2ROA9D9pX7EmChpkK3lYgSxiKCcjvF2jja",
+      "createdAt": "2026-05-09T15:41:46.036Z",
+      "balance": 1
     }
   ],
   "expenses": [
@@ -65,6 +106,34 @@
       "receiptName": "",
       "receiptSize": 0,
       "createdAt": "2026-03-09T02:30:00.000Z"
+    },
+    {
+      "id": "d042ab48-0acb-4649-a374-930e674b03ea",
+      "userId": "google-user-demo-001",
+      "title": "Smoke Expense",
+      "category": "Food",
+      "amount": 50,
+      "currency": "PHP",
+      "amountPhp": 50,
+      "expenseDate": "2026-05-09",
+      "notes": "smoke",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-05-09T14:39:11.099Z"
+    },
+    {
+      "id": "60d9d346-f385-4ecb-928f-a0225f93c4ca",
+      "userId": "google-user-demo-001",
+      "title": "Smoke Expense",
+      "category": "Food",
+      "amount": 50,
+      "currency": "PHP",
+      "amountPhp": 50,
+      "expenseDate": "2026-05-09",
+      "notes": "smoke",
+      "receiptName": "",
+      "receiptSize": 0,
+      "createdAt": "2026-05-09T15:32:49.092Z"
     }
   ]
 }
