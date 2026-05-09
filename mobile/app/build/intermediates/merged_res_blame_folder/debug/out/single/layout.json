@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.pocketbooks.mobile.app-mergeDebugResources-32:/layout/activity_register.xml",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-mergeDebugResources-32:/layout/activity_login.xml",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-mergeDebugResources-32:/layout/activity_home.xml",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_home.xml"
+    }
+]
