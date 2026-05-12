@@ -1,9 +1,11 @@
-package com.pocketbooks.backend.service;
+package com.pocketbooks.backend.auth.application;
 
-import com.pocketbooks.backend.dto.*;
-import com.pocketbooks.backend.entity.User;
-import com.pocketbooks.backend.repository.UserRepository;
-import com.pocketbooks.backend.security.JwtUtil;
+import com.pocketbooks.backend.auth.application.dto.AuthResponse;
+import com.pocketbooks.backend.auth.application.dto.LoginRequest;
+import com.pocketbooks.backend.auth.application.dto.RegisterRequest;
+import com.pocketbooks.backend.auth.domain.User;
+import com.pocketbooks.backend.auth.domain.UserRepository;
+import com.pocketbooks.backend.auth.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
