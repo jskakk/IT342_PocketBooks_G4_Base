@@ -30,6 +30,27 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(nullable = true)
+    private Double monthlyBudget;
+
+    @Column(nullable = true)
+    private String institution;
+
+    @Column(nullable = true)
+    private String displayCurrency = "PHP";
+
+    @Column(nullable = false)
+    private Boolean emailReceipts = true;
+
+    @Column(nullable = false)
+    private Boolean expenseAlerts = true;
+
+    @Column(nullable = false)
+    private Boolean weeklySummary = false;
+
+    @Column(nullable = false)
+    private Boolean loginAlerts = true;
+
     public enum Role {
         ROLE_STUDENT, ROLE_ADMIN
     }
@@ -54,6 +75,13 @@ public class User {
     public Role getRole() { return role; }
     public Double getBalance() { return balance; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public Double getMonthlyBudget() { return monthlyBudget; }
+    public String getInstitution() { return institution; }
+    public String getDisplayCurrency() { return displayCurrency; }
+    public Boolean getEmailReceipts() { return emailReceipts; }
+    public Boolean getExpenseAlerts() { return expenseAlerts; }
+    public Boolean getWeeklySummary() { return weeklySummary; }
+    public Boolean getLoginAlerts() { return loginAlerts; }
 
     // ── Setters ─────────────────────────────────────────────────
     public void setId(Long id) { this.id = id; }
@@ -63,4 +91,11 @@ public class User {
     public void setRole(Role role) { this.role = role; }
     public void setBalance(Double balance) { this.balance = balance; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setMonthlyBudget(Double monthlyBudget) { this.monthlyBudget = monthlyBudget; }
+    public void setInstitution(String institution) { this.institution = institution; }
+    public void setDisplayCurrency(String displayCurrency) { this.displayCurrency = displayCurrency; }
+    public void setEmailReceipts(Boolean emailReceipts) { this.emailReceipts = emailReceipts; }
+    public void setExpenseAlerts(Boolean expenseAlerts) { this.expenseAlerts = expenseAlerts; }
+    public void setWeeklySummary(Boolean weeklySummary) { this.weeklySummary = weeklySummary; }
+    public void setLoginAlerts(Boolean loginAlerts) { this.loginAlerts = loginAlerts; }
 }

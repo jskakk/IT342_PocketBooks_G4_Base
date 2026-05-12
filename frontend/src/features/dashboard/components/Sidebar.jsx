@@ -5,8 +5,8 @@ function Sidebar({ active }) {
     { icon: '📊', label: 'Dashboard', id: 'dashboard', to: '/dashboard' },
     { icon: '💰', label: 'Expenses', id: 'expenses', to: '/expenses/new' },
     { icon: '👛', label: 'Wallet', id: 'wallet', to: '/wallet' },
-    { icon: '📈', label: 'Analytics', id: 'analytics', to: '/dashboard' },
-    { icon: '⚙️', label: 'Settings', id: 'settings', to: '/dashboard' },
+    { icon: '📈', label: 'Analytics', id: 'analytics', to: '/analytics' },
+    { icon: '⚙️', label: 'Settings', id: 'settings', to: '/settings' },
   ]
 
   return (

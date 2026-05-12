@@ -1,8 +1,10 @@
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\api\AuthController.java
+C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\application\AuthenticationFacade.java
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\application\AuthService.java
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\application\dto\AuthResponse.java
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\application\dto\LoginRequest.java
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\application\dto\RegisterRequest.java
+C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\application\ExpenseFactory.java
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\domain\User.java
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\domain\UserRepository.java
 C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\backend\src\main\java\com\pocketbooks\backend\auth\security\JwtAuthFilter.java

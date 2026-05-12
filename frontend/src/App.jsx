@@ -4,6 +4,8 @@ import AuthPage from './features/auth/pages/AuthPage'
 import AddExpense from './features/expenses/pages/AddExpense'
 import Dashboard from './features/dashboard/pages/Dashboard'
 import Wallet from './features/wallet/pages/Wallet'
+import Analytics from './features/dashboard/pages/Analytics'
+import Settings from './features/dashboard/pages/Settings'
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/expenses/new" element={<AddExpense />} />
       <Route path="/wallet" element={<Wallet />} />
+      <Route path="/analytics" element={<Analytics />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   )
 }
