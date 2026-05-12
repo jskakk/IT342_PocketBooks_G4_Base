@@ -1,6 +1,6 @@
 package com.pocketbooks.backend.config;
 
-import com.pocketbooks.backend.security.JwtAuthFilter;
+import com.pocketbooks.backend.auth.security.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.*;
