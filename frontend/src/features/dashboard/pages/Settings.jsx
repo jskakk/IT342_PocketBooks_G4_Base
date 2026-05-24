@@ -188,9 +188,7 @@ function Settings() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('authUser')
-    localStorage.removeItem('authToken')
-    navigate('/login')
+    window.dispatchEvent(new Event('openLogoutModal'))
   }
 
   const handleExportData = () => {

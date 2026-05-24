@@ -165,9 +165,8 @@ function Dashboard() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('authUser')
-    localStorage.removeItem('authToken')
-    navigate('/login')
+    // Open the shared logout confirmation modal in Sidebar
+    window.dispatchEvent(new Event('openLogoutModal'))
   }
 
   return (

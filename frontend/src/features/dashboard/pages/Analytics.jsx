@@ -133,9 +133,7 @@ function Analytics() {
   const avgDailySpend = monthExpenses.length > 0 ? monthTotal / monthExpenses.length : 0
 
   const handleLogout = () => {
-    localStorage.removeItem('authUser')
-    localStorage.removeItem('authToken')
-    navigate('/login')
+    window.dispatchEvent(new Event('openLogoutModal'))
   }
 
   return (
