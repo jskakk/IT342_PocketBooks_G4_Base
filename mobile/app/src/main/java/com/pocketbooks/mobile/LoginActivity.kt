@@ -22,6 +22,12 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if (SessionManager.isLoggedIn(this)) {
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
+            return
+        }
+
         binding.btnLogin.setOnClickListener {
             handleLogin()
         }
@@ -53,17 +59,19 @@ class LoginActivity : AppCompatActivity() {
 
                 if (response.isSuccessful && response.body() != null) {
                     val auth = response.body()!!
+                    val sessionUser = com.pocketbooks.mobile.model.ApiUser(
+                        id = auth.email ?: email,
+                        name = auth.fullName ?: "User",
+                        email = auth.email ?: email,
+                    )
+                    SessionManager.saveSession(this@LoginActivity, sessionUser, auth.token)
                     Toast.makeText(
                         this@LoginActivity,
                         auth.message ?: getString(R.string.login_success),
                         Toast.LENGTH_SHORT
                     ).show()
 
-                    val intent = Intent(this@LoginActivity, HomeActivity::class.java).apply {
-                        putExtra("user_email", auth.email ?: email)
-                        putExtra("user_name", auth.fullName ?: "User")
-                    }
-                    startActivity(intent)
+                    startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
                     finish()
                 } else {
                     val errorMessage = parseError(response.errorBody()?.string())

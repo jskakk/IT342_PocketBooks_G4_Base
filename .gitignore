@@ -1,0 +1,21 @@
+# Root .gitignore for repo
+
+# Node / frontend
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env.local
+
+# Backend / Maven
+/backend/target/
+/.mvn/wrapper/maven-wrapper.jar
+
+# Mobile / Gradle
+/mobile/.gradle/
+/mobile/app/build/
+
+# IDEs
+/.idea/
+*.iml
+
+# OS files
+.DS_Store

@@ -11,6 +11,13 @@ data class LoginRequest(
     val password: String
 )
 
+data class ApiUser(
+    val id: String,
+    val name: String,
+    val email: String,
+    val createdAt: String? = null
+)
+
 data class AuthResponse(
     val token: String? = null,
     val email: String? = null,
