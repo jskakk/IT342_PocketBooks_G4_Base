@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../dashboard/components/Sidebar'
 
 const quickAmounts = [100, 250, 500, 1000]
-const historyKey = 'pocketbooksWalletHistory'
-
 const formatCurrency = (value, currency) =>
   new Intl.NumberFormat('en-PH', {
     style: 'currency',
@@ -25,6 +23,7 @@ function Wallet() {
   }, [])
 
   const token = useMemo(() => localStorage.getItem('authToken') || '', [])
+  const historyKey = user ? `pocketbooksWalletHistory:${user.email || user.id}` : 'pocketbooksWalletHistory'
   const [balance, setBalance] = useState(null)
   const [selectedAmount, setSelectedAmount] = useState(500)
   const [customAmount, setCustomAmount] = useState('')
@@ -47,6 +46,15 @@ function Wallet() {
     // persist wallet top-up history locally (balance persisted on server)
     localStorage.setItem(historyKey, JSON.stringify(history))
   }, [history])
+
+  useEffect(() => {
+    try {
+      const savedHistory = JSON.parse(localStorage.getItem(historyKey) || '[]')
+      setHistory(Array.isArray(savedHistory) ? savedHistory : [])
+    } catch {
+      setHistory([])
+    }
+  }, [historyKey])
 
   useEffect(() => {
     if (!user) return

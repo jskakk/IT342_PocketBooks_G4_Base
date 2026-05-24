@@ -40,6 +40,9 @@ function AuthPage({ mode }) {
     if (!formData.password.trim()) {
       return 'Password is required.'
     }
+    if (formData.password.length < 8) {
+      return 'Password must be at least 8 characters.'
+    }
     return ''
   }
 
@@ -56,28 +59,40 @@ function AuthPage({ mode }) {
 
     try {
       setIsSubmitting(true)
-      const endpoint = isRegister ? '/api/register' : '/api/login'
-      const response = await fetch(apiUrl(endpoint), {
+      const authBaseUrl = import.meta.env.VITE_AUTH_API_BASE_URL || 'http://localhost:8080'
+      const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login'
+      const response = await fetch(`${authBaseUrl}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(
+          isRegister
+            ? { fullName: formData.name, email: formData.email, password: formData.password }
+            : { email: formData.email, password: formData.password },
+        ),
       })
 
       const data = await response.json()
       if (!response.ok) {
-        setError(data.message || 'Request failed. Please try again.')
+        setError(data.message || data.error || 'Request failed. Please try again.')
         return
       }
 
+      const authUser = {
+        id: data.email,
+        name: data.fullName,
+        email: data.email,
+        role: data.role,
+      }
+
       if (isRegister) {
-        setSuccess('Account created successfully. You can now sign in.')
+        setSuccess(data.message || 'Account created successfully. You can now sign in.')
         setFormData(initialRegister)
         return
       }
 
-      localStorage.setItem('authUser', JSON.stringify(data.user))
+      localStorage.setItem('authUser', JSON.stringify(authUser))
       localStorage.setItem('authToken', data.token)
-      navigate('/dashboard')
+      navigate(data.role === 'ROLE_ADMIN' ? '/admin/dashboard' : '/dashboard')
     } catch {
       setError('Could not connect to the server. Please try again.')
     } finally {
@@ -98,7 +113,8 @@ function AuthPage({ mode }) {
     try {
       setIsSubmitting(true)
 
-      const response = await fetch(apiUrl('/api/google-login'), {
+      const authBaseUrl = import.meta.env.VITE_AUTH_API_BASE_URL || 'http://localhost:8080'
+      const response = await fetch(`${authBaseUrl}/api/auth/google-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: credential }),
@@ -113,7 +129,7 @@ function AuthPage({ mode }) {
       localStorage.setItem('authUser', JSON.stringify(data.user))
       localStorage.setItem('authToken', data.token)
       localStorage.setItem('authProvider', 'google')
-      navigate('/dashboard')
+      navigate(data.user.role === 'ROLE_ADMIN' ? '/admin/dashboard' : '/dashboard')
     } catch (error) {
       setError('Could not complete Google login. Please try again.')
       console.error('Google login error:', error)

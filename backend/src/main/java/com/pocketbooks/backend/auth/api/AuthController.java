@@ -42,6 +42,18 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/google-login")
+    public ResponseEntity<?> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        try {
+            AuthResponse response = authService.googleLogin(request.getToken());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(
             org.springframework.security.core.Authentication authentication) {

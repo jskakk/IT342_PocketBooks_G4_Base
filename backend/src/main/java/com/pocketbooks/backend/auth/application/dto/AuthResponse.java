@@ -6,6 +6,7 @@ public class AuthResponse {
     private String fullName;
     private String role;
     private String message;
+    private Object user;
 
     public AuthResponse() {}
 
@@ -18,9 +19,16 @@ public class AuthResponse {
         this.message = message;
     }
 
+    public AuthResponse(String token, Object user, String message) {
+        this.token = token;
+        this.user = user;
+        this.message = message;
+    }
+
     public String getToken()    { return token; }
     public String getEmail()    { return email; }
     public String getFullName() { return fullName; }
     public String getRole()     { return role; }
     public String getMessage()  { return message; }
+    public Object getUser()     { return user; }
 }
