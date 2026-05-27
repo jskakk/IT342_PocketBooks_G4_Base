@@ -1,8 +1,4 @@
 # PocketBooks — Expense Tracker (IT342 Group Project)
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-local-brightgreen.svg)](#)
-
 A lightweight full-stack expense tracker used for the IT342 course project. PocketBooks helps users record expenses, manage wallets and categories, and provides admin views for inspecting and moderating data.
 
 Key tech:
@@ -55,10 +51,6 @@ Admin pages live under the web app's admin route and communicate with these endp
 
 - `/api/admin/expenses` — admin expense listing and moderation
 - `/api/admin/users` — view and change user roles
-
-## Contributing
-
-If you'd like changes or improvements (e.g., CI badges, screenshots, or a demo GIF), tell me which style you prefer and I can update the README and commit the changes.
 
 ## Files
 
