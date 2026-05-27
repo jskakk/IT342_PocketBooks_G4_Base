@@ -3,6 +3,7 @@
 # Node / frontend
 /frontend/node_modules/
 /frontend/dist/
+/frontend/.env
 /frontend/.env.local
 /frontend/server/db.json
 
@@ -11,6 +12,8 @@
 /.mvn/wrapper/maven-wrapper.jar
 /backend/.idea/
 /backend/*.iml
+/backend/src/main/resources/application.properties
+/backend/src/test/resources/application.properties
 
 # Mobile / Gradle
 /mobile/.gradle/
