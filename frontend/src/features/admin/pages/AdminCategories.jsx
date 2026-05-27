@@ -2,14 +2,20 @@ import { useState, useEffect } from 'react'
 import { apiUrl } from '../../../lib/api'
 import AdminSidebar from '../components/AdminSidebar'
 
+const phpFormatter = new Intl.NumberFormat('en-PH', {
+  style: 'currency',
+  currency: 'PHP',
+})
+
 function AdminCategories() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
-  const [newCategory, setNewCategory] = useState({ name: '', icon: '' })
-  const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
   const authToken = localStorage.getItem('authToken')
+
+  const totalCategories = categories.length
+  const usedCategories = categories.filter((category) => Number(category.usedInExpenses || 0) > 0).length
+  const totalExpensesTracked = categories.reduce((sum, category) => sum + Number(category.usedInExpenses || 0), 0)
 
   useEffect(() => {
     fetchCategories()
@@ -17,11 +23,50 @@ function AdminCategories() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(apiUrl('/api/admin/categories'), {
+      const response = await fetch(apiUrl('/api/admin/expenses'), {
         headers: { 'Authorization': `Bearer ${authToken}` }
       })
       const data = await response.json()
-      setCategories(data)
+      const expenses = Array.isArray(data) ? data : []
+
+      const categoryMap = new Map()
+
+      expenses.forEach((expense) => {
+        const rawName = (expense.category || '').trim()
+        if (!rawName) {
+          return
+        }
+
+        const key = rawName.toLowerCase()
+        const amount = Number(expense.amountPhp ?? expense.amount ?? 0)
+        const createdAt = expense.createdAt || expense.date || ''
+
+        const existing = categoryMap.get(key)
+        if (!existing) {
+          categoryMap.set(key, {
+            id: key,
+            name: rawName,
+            icon: iconForCategory(rawName),
+            createdAt,
+            usedInExpenses: 1,
+            totalSpent: amount,
+          })
+          return
+        }
+
+        existing.usedInExpenses += 1
+        existing.totalSpent += amount
+        if (!existing.createdAt || (createdAt && new Date(createdAt) < new Date(existing.createdAt))) {
+          existing.createdAt = createdAt
+        }
+      })
+
+      setCategories(Array.from(categoryMap.values()).sort((left, right) => {
+        if (right.usedInExpenses !== left.usedInExpenses) {
+          return right.usedInExpenses - left.usedInExpenses
+        }
+        return left.name.localeCompare(right.name)
+      }))
     } catch (err) {
       setError('Failed to load categories')
       console.error(err)
@@ -30,55 +75,25 @@ function AdminCategories() {
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!newCategory.name.trim()) {
-      setError('Category name is required')
-      return
-    }
-
-    try {
-      const method = editingId ? 'PUT' : 'POST'
-      const url = editingId ? apiUrl(`/api/admin/categories/${editingId}`) : apiUrl('/api/admin/categories')
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify(newCategory)
-      })
-
-      if (!response.ok) throw new Error('Failed to save category')
-
-      setNewCategory({ name: '', icon: '' })
-      setEditingId(null)
-      setShowForm(false)
-      setError('')
-      fetchCategories()
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const handleEdit = (cat) => {
-    setNewCategory({ name: cat.name, icon: cat.icon || '' })
-    setEditingId(cat.id)
-    setShowForm(true)
-  }
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this category?')) return
-    try {
-      const response = await fetch(apiUrl(`/api/admin/categories/${id}`), {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${authToken}` }
-      })
-      if (!response.ok) throw new Error('Failed to delete')
-      fetchCategories()
-    } catch (err) {
-      setError('Failed to delete category')
+  const iconForCategory = (categoryName) => {
+    const normalized = categoryName.trim().toLowerCase()
+    switch (normalized) {
+      case 'food':
+        return '🍔'
+      case 'transportation':
+        return '🚌'
+      case 'school':
+        return '🎓'
+      case 'bills':
+        return '🧾'
+      case 'shopping':
+        return '🛍️'
+      case 'health':
+        return '🏥'
+      case 'entertainment':
+        return '🎬'
+      default:
+        return '📁'
     }
   }
 
@@ -90,57 +105,58 @@ function AdminCategories() {
       <main className="dashboard-main">
         <header className="dashboard-header">
           <h1>Category Management</h1>
-          <button className="btn-primary" onClick={() => { setShowForm(!showForm); setEditingId(null); setNewCategory({ name: '', icon: '' }); }}>
-            + Add Category
-          </button>
         </header>
 
         <div className="dashboard-content admin-full">
-          {error && <div className="error-message">{error}</div>}
-
-          {showForm && (
-            <div className="form-card">
-              <h2>{editingId ? 'Edit Category' : 'New Category'}</h2>
-              <form onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  placeholder="Category name"
-                  value={newCategory.name}
-                  onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                />
-                <input
-                  type="text"
-                  placeholder="Icon (emoji or name)"
-                  value={newCategory.icon}
-                  onChange={(e) => setNewCategory({ ...newCategory, icon: e.target.value })}
-                />
-                <div className="form-actions">
-                  <button type="submit" className="btn-primary">Save</button>
-                  <button type="button" className="btn-secondary" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</button>
-                </div>
-              </form>
+          <div className="category-stats-grid">
+            <div className="category-stat-card">
+              <span className="category-stat-label">Total Categories</span>
+              <strong>{totalCategories}</strong>
             </div>
-          )}
+            <div className="category-stat-card">
+              <span className="category-stat-label">Categories In Use</span>
+              <strong>{usedCategories}</strong>
+            </div>
+            <div className="category-stat-card">
+              <span className="category-stat-label">Tracked Expense Entries</span>
+              <strong>{totalExpensesTracked}</strong>
+            </div>
+          </div>
+
+          <p className="category-helper-text">
+            These categories are pulled automatically from expense entries. When users choose a category while adding an expense, it appears here with live usage totals.
+          </p>
+
+          {error && <div className="error-message">{error}</div>}
 
           <table className="data-table">
             <thead>
               <tr>
                 <th>Icon</th>
                 <th>Name</th>
+                <th>Used In</th>
+                <th>Total Spent</th>
                 <th>Created</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {categories.map((cat) => (
-                <tr key={cat.id}>
+              {categories.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="empty-table-cell">
+                    No categories have been recorded yet. Add expenses and the categories will appear here automatically.
+                  </td>
+                </tr>
+              ) : categories.map((cat) => (
+                <tr key={cat.id || cat.name}>
                   <td>{cat.icon || '-'}</td>
                   <td>{cat.name}</td>
-                  <td>{new Date(cat.createdAt).toLocaleDateString()}</td>
                   <td>
-                    <button className="btn-edit" onClick={() => handleEdit(cat)}>Edit</button>
-                    <button className="btn-delete" onClick={() => handleDelete(cat.id)}>Delete</button>
+                    <span className={`usage-pill ${Number(cat.usedInExpenses || 0) > 0 ? 'usage-pill-active' : ''}`}>
+                      {cat.usedInExpenses || 0} expenses
+                    </span>
                   </td>
+                  <td>{phpFormatter.format(Number(cat.totalSpent || 0))}</td>
+                  <td>{cat.createdAt ? new Date(cat.createdAt).toLocaleDateString() : '—'}</td>
                 </tr>
               ))}
             </tbody>

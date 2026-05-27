@@ -22,8 +22,8 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ResponseEntity<List<Map<String, Object>>> getAllCategories() {
+        return ResponseEntity.ok(categoryService.getAllCategoriesWithUsage());
     }
 
     @GetMapping("/{id}")
