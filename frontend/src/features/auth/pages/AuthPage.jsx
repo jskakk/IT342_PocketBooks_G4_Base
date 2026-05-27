@@ -213,11 +213,6 @@ function AuthPage({ mode }) {
               </div>
             )}
 
-            <div className="separator">
-              <span>{isRegister ? 'Create with email' : 'Email Address'}</span>
-              <span>{isRegister ? 'required fields' : 'or sign in with email'}</span>
-            </div>
-
             {isRegister && (
               <>
                 <label className="field-label" htmlFor="name">
