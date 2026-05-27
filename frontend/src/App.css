@@ -2652,6 +2652,45 @@ input:focus {
 .modal-card p { color: #607080; margin: 0 }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px }
 
+.user-detail-modal {
+  width: min(520px, calc(100vw - 32px));
+}
+
+.user-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin-top: 12px;
+}
+
+.expense-detail-modal {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.expense-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  margin-top: 12px;
+}
+
+.detail-label {
+  display: block;
+  color: #7a8a98;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  color: #1f2d3d;
+  font-size: 15px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
 
 .btn-link {
   margin-left: 8px;

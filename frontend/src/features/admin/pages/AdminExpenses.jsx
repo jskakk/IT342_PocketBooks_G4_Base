@@ -4,6 +4,7 @@ import AdminSidebar from '../components/AdminSidebar'
 
 function AdminExpenses() {
   const [expenses, setExpenses] = useState([])
+  const [selectedExpense, setSelectedExpense] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const authToken = localStorage.getItem('authToken')
@@ -40,6 +41,7 @@ function AdminExpenses() {
         headers: { 'Authorization': `Bearer ${authToken}` }
       })
       if (!response.ok) throw new Error('Failed to delete')
+      setSelectedExpense(null)
       fetchExpenses()
     } catch (err) {
       setError('Failed to delete expense')
@@ -99,7 +101,7 @@ function AdminExpenses() {
                       <td className="cell-number">₱{exp.amount?.toFixed(2)}</td>
                       <td className="cell-date">{new Date(exp.date).toLocaleDateString()}</td>
                       <td>
-                        <button className="btn-view">📋 View</button>
+                        <button className="btn-view" onClick={() => setSelectedExpense(exp)}>📋 View</button>
                         <button
                           className="btn-view"
                           style={{color: '#e74c3c'}}
@@ -119,6 +121,44 @@ function AdminExpenses() {
             </div>
           )}
         </div>
+
+        {selectedExpense && (
+          <div className="modal-overlay" onClick={() => setSelectedExpense(null)}>
+            <div className="modal-card expense-detail-modal" onClick={(event) => event.stopPropagation()}>
+              <h3>Expense Details</h3>
+              <div className="expense-detail-grid">
+                <div>
+                  <span className="detail-label">User</span>
+                  <div className="detail-value">{selectedExpense.userName || '—'}</div>
+                </div>
+                <div>
+                  <span className="detail-label">Description</span>
+                  <div className="detail-value">{selectedExpense.description}</div>
+                </div>
+                <div>
+                  <span className="detail-label">Category</span>
+                  <div className="detail-value">{selectedExpense.category}</div>
+                </div>
+                <div>
+                  <span className="detail-label">Amount</span>
+                  <div className="detail-value">₱{selectedExpense.amount?.toFixed(2)}</div>
+                </div>
+                <div>
+                  <span className="detail-label">Date</span>
+                  <div className="detail-value">{new Date(selectedExpense.date).toLocaleDateString()}</div>
+                </div>
+                <div>
+                  <span className="detail-label">Expense ID</span>
+                  <div className="detail-value">{selectedExpense.id}</div>
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button className="btn-secondary" onClick={() => setSelectedExpense(null)}>Close</button>
+                <button className="btn-primary" onClick={() => handleDelete(selectedExpense.id)}>Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

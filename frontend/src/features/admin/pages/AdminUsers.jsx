@@ -4,6 +4,10 @@ import AdminSidebar from '../components/AdminSidebar'
 
 function AdminUsers() {
   const [users, setUsers] = useState([])
+  const [selectedUserId, setSelectedUserId] = useState(null)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [detailsLoading, setDetailsLoading] = useState(false)
+  const [detailsError, setDetailsError] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -53,6 +57,31 @@ function AdminUsers() {
     } catch (err) {
       setError('Failed to update user role')
       console.error('Error updating role:', err)
+    }
+  }
+
+  const handleViewUser = async (userId) => {
+    setSelectedUserId(userId)
+    setSelectedUser(null)
+    setDetailsError('')
+    setDetailsLoading(true)
+
+    try {
+      const response = await fetch(apiUrl(`/api/admin/users/${userId}`), {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to load user details: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      setSelectedUser(data)
+    } catch (err) {
+      setDetailsError('Failed to load user details. Please try again.')
+      console.error('Error fetching user details:', err)
+    } finally {
+      setDetailsLoading(false)
     }
   }
 
@@ -122,7 +151,7 @@ function AdminUsers() {
                       <td className="cell-number">₱{user.balance?.toFixed(2) || '0.00'}</td>
                       <td className="cell-date">{new Date(user.createdAt).toLocaleDateString()}</td>
                       <td>
-                        <button className="btn-view">📋 View</button>
+                          <button className="btn-view" onClick={() => handleViewUser(user.id)}>📋 View</button>
                       </td>
                     </tr>
                   ))}
@@ -131,6 +160,57 @@ function AdminUsers() {
             </div>
           )}
         </div>
+
+          {(detailsLoading || detailsError || selectedUser) && (
+            <div className="modal-overlay" onClick={() => setSelectedUser(null)}>
+              <div className="modal-card user-detail-modal" onClick={(event) => event.stopPropagation()}>
+                <h3>User Details</h3>
+                {detailsLoading ? (
+                  <p>Loading user details...</p>
+                ) : detailsError ? (
+                  <>
+                    <p>{detailsError}</p>
+                    <div className="modal-actions">
+                      <button className="btn-secondary" onClick={() => setSelectedUser(null)}>Close</button>
+                      {selectedUserId != null && (
+                        <button className="btn-primary" onClick={() => handleViewUser(selectedUserId)}>Retry</button>
+                      )}
+                    </div>
+                  </>
+                ) : selectedUser ? (
+                  <div className="user-detail-grid">
+                    <div>
+                      <span className="detail-label">Full Name</span>
+                      <div className="detail-value">{selectedUser.fullName}</div>
+                    </div>
+                    <div>
+                      <span className="detail-label">Email</span>
+                      <div className="detail-value">{selectedUser.email}</div>
+                    </div>
+                    <div>
+                      <span className="detail-label">Role</span>
+                      <div className="detail-value">{selectedUser.role === 'ROLE_ADMIN' ? 'Admin' : 'Student'}</div>
+                    </div>
+                    <div>
+                      <span className="detail-label">Balance</span>
+                      <div className="detail-value">₱{selectedUser.balance?.toFixed(2) || '0.00'}</div>
+                    </div>
+                    <div>
+                      <span className="detail-label">Joined</span>
+                      <div className="detail-value">{new Date(selectedUser.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div>
+                      <span className="detail-label">User ID</span>
+                      <div className="detail-value">{selectedUser.id}</div>
+                    </div>
+                  </div>
+                ) : null}
+                <div className="modal-actions">
+                  <button className="btn-secondary" onClick={() => setSelectedUser(null)}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
       </main>
     </div>
   )
