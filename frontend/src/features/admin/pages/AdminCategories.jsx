@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { apiUrl } from '../../../lib/api'
 import AdminSidebar from '../components/AdminSidebar'
 
@@ -11,11 +11,24 @@ function AdminCategories() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [filterText, setFilterText] = useState('')
   const authToken = localStorage.getItem('authToken')
 
   const totalCategories = categories.length
   const usedCategories = categories.filter((category) => Number(category.usedInExpenses || 0) > 0).length
   const totalExpensesTracked = categories.reduce((sum, category) => sum + Number(category.usedInExpenses || 0), 0)
+  const filteredCategories = useMemo(() => {
+    const query = filterText.trim().toLowerCase()
+    if (!query) {
+      return categories
+    }
+
+    return categories.filter((category) => {
+      const name = String(category.name || '').toLowerCase()
+      const icon = String(category.icon || '').toLowerCase()
+      return name.includes(query) || icon.includes(query)
+    })
+  }, [categories, filterText])
 
   useEffect(() => {
     fetchCategories()
@@ -127,6 +140,16 @@ function AdminCategories() {
             These categories are pulled automatically from expense entries. When users choose a category while adding an expense, it appears here with live usage totals.
           </p>
 
+          <div className="category-filter-row">
+            <input
+              type="text"
+              className="category-filter-input"
+              placeholder="Filter categories by name or icon"
+              value={filterText}
+              onChange={(event) => setFilterText(event.target.value)}
+            />
+          </div>
+
           {error && <div className="error-message">{error}</div>}
 
           <table className="data-table">
@@ -140,13 +163,15 @@ function AdminCategories() {
               </tr>
             </thead>
             <tbody>
-              {categories.length === 0 ? (
+              {filteredCategories.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="empty-table-cell">
-                    No categories have been recorded yet. Add expenses and the categories will appear here automatically.
+                    {categories.length === 0
+                      ? 'No categories have been recorded yet. Add expenses and the categories will appear here automatically.'
+                      : 'No categories match your filter.'}
                   </td>
                 </tr>
-              ) : categories.map((cat) => (
+              ) : filteredCategories.map((cat) => (
                 <tr key={cat.id || cat.name}>
                   <td>{cat.icon || '-'}</td>
                   <td>{cat.name}</td>

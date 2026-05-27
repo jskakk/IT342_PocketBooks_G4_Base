@@ -2728,6 +2728,28 @@ input:focus {
   line-height: 1.6;
 }
 
+.category-filter-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.category-filter-input {
+  width: min(360px, 100%);
+  height: 46px;
+  margin-bottom: 0;
+  border: 1px solid #d7dfe8;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #1f2d3d;
+  background: #ffffff;
+}
+
+.category-filter-input:focus {
+  border-color: #1b5f99;
+}
+
 .usage-pill {
   display: inline-flex;
   align-items: center;
