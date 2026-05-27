@@ -43,6 +43,7 @@ Open the `mobile` folder in Android Studio and run on an emulator or device.
 ## Configuration
 
 - API base for the frontend is configured via `VITE_API_BASE_URL` in the `frontend` environment.
+- Mobile API base defaults to `http://10.0.2.2:8080/` for the Android emulator and can be overridden with `POCKETBOOKS_API_BASE_URL` in `mobile/gradle.properties`.
 - Backend DB settings live in `backend/src/main/resources/application.properties`.
 
 ## Admin Pages

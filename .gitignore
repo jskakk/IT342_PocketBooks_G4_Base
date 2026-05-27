@@ -4,18 +4,25 @@
 /frontend/node_modules/
 /frontend/dist/
 /frontend/.env.local
+/frontend/server/db.json
 
 # Backend / Maven
 /backend/target/
 /.mvn/wrapper/maven-wrapper.jar
+/backend/.idea/
+/backend/*.iml
 
 # Mobile / Gradle
 /mobile/.gradle/
 /mobile/app/build/
+/mobile/.idea/
+/mobile/*.iml
+/mobile/local.properties
 
 # IDEs
-/.idea/
+.idea/
 *.iml
 
 # OS files
 .DS_Store
+*.log

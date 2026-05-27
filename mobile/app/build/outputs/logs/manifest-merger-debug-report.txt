@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-29:12
-INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-29:12
-INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-29:12
-INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-29:12
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-41:12
+INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-41:12
+INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-41:12
+INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:2:1-41:12
 MERGED from [androidx.databinding:viewbinding:8.2.2] C:\Users\Kaka\.gradle\caches\transforms-3\7320356cb5b7cff6dfdb7603c6edfceb\transformed\viewbinding-8.2.2\AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\Kaka\.gradle\caches\transforms-3\dab5f955acb604fd7412de8eaa104c9d\transformed\material-1.12.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\Kaka\.gradle\caches\transforms-3\45d7c839a8773bdf808cdb9a5f86327a\transformed\constraintlayout-2.1.4\AndroidManifest.xml:2:1-11:12
@@ -62,8 +62,8 @@ ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_
 	android:name
 		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:4:22-64
 application
-ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:6:5-27:19
-INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:6:5-27:19
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:6:5-39:19
+INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:6:5-39:19
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\Kaka\.gradle\caches\transforms-3\dab5f955acb604fd7412de8eaa104c9d\transformed\material-1.12.0\AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\Kaka\.gradle\caches\transforms-3\dab5f955acb604fd7412de8eaa104c9d\transformed\material-1.12.0\AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] C:\Users\Kaka\.gradle\caches\transforms-3\45d7c839a8773bdf808cdb9a5f86327a\transformed\constraintlayout-2.1.4\AndroidManifest.xml:9:5-20
@@ -100,28 +100,52 @@ ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_
 		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:14:13-37
 	android:name
 		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:13:13-41
-activity#com.pocketbooks.mobile.RegisterActivity
+activity#com.pocketbooks.mobile.WalletActivity
 ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:15:9-17:40
 	android:exported
 		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:17:13-37
 	android:name
-		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:16:13-45
-activity#com.pocketbooks.mobile.LoginActivity
-ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:18:9-26:20
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:16:13-43
+activity#com.pocketbooks.mobile.AddExpenseActivity
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:18:9-20:40
 	android:exported
-		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:20:13-36
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:20:13-37
 	android:name
-		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:19:13-42
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:19:13-47
+activity#com.pocketbooks.mobile.AnalyticsActivity
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:21:9-23:40
+	android:exported
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:23:13-37
+	android:name
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:22:13-46
+activity#com.pocketbooks.mobile.SettingsActivity
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:24:9-26:40
+	android:exported
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:26:13-37
+	android:name
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:25:13-45
+activity#com.pocketbooks.mobile.RegisterActivity
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:27:9-29:40
+	android:exported
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:29:13-37
+	android:name
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:28:13-45
+activity#com.pocketbooks.mobile.LoginActivity
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:30:9-38:20
+	android:exported
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:32:13-36
+	android:name
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:31:13-42
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:21:13-25:29
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:33:13-37:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:22:17-69
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:34:17-69
 	android:name
-		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:22:25-66
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:34:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:24:17-77
+ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:36:17-77
 	android:name
-		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:24:27-74
+		ADDED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml:36:27-74
 uses-sdk
 INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Users\Kaka\Desktop\IT342_PocketBooks_G4_Base\IT342_PocketBooks_G4_Base\mobile\app\src\main\AndroidManifest.xml

@@ -30,6 +30,18 @@
             android:name="com.pocketbooks.mobile.HomeActivity"
             android:exported="false" />
         <activity
+            android:name="com.pocketbooks.mobile.WalletActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.pocketbooks.mobile.AddExpenseActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.pocketbooks.mobile.AnalyticsActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.pocketbooks.mobile.SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name="com.pocketbooks.mobile.RegisterActivity"
             android:exported="false" />
         <activity

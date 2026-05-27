@@ -1,5 +1,6 @@
 package com.pocketbooks.mobile.network
 
+import com.pocketbooks.mobile.BuildConfig
 import com.pocketbooks.mobile.AuthTokenStore
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,8 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    // Android emulator uses 10.0.2.2 to access host machine localhost.
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    private val baseUrl = BuildConfig.API_BASE_URL
 
     private val logger = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -31,7 +31,7 @@ object ApiClient {
         .build()
 
     val apiService: ApiService = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(baseUrl)
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

@@ -3,6 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val apiBaseUrl = (project.findProperty("POCKETBOOKS_API_BASE_URL") as String?)
+    ?.takeIf { it.isNotBlank() }
+    ?: "http://10.0.2.2:8080/"
+
 android {
     namespace = "com.pocketbooks.mobile"
     compileSdk = 34
@@ -15,6 +19,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
     buildTypes {
@@ -37,6 +42,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         viewBinding = true
     }
 }

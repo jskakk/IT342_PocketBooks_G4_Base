@@ -76,6 +76,13 @@
       "passwordHash": "$2b$12$9hEsx.sCTeFZdOjfA.n2ROA9D9pX7EmChpkK3lYgSxiKCcjvF2jja",
       "createdAt": "2026-05-09T15:41:46.036Z",
       "balance": 1
+    },
+    {
+      "id": "769a1d35-7bb4-4b43-b13a-d9b5c8132849",
+      "name": "Test2",
+      "email": "testuser22@gmail.com",
+      "passwordHash": "$2b$12$oOxneTadZXVAT2VPWLRVx.BZKhlak0dwEQl848osTTpwqeTGFRCTS",
+      "createdAt": "2026-05-13T12:41:58.259Z"
     }
   ],
   "expenses": [

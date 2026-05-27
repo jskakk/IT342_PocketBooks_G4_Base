@@ -8,8 +8,20 @@
         "source": "com.pocketbooks.mobile.app-main-35:/mipmap-anydpi-v33/ic_launcher.xml"
     },
     {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_wallet.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_wallet.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_settings.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_settings.xml"
+    },
+    {
         "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_home.xml.flat",
         "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_home.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_add_expense.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_add_expense.xml"
     },
     {
         "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_register.xml.flat",
@@ -18,5 +30,9 @@
     {
         "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_login.xml.flat",
         "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.pocketbooks.mobile.app-merged_res-33:/layout_activity_analytics.xml.flat",
+        "source": "com.pocketbooks.mobile.app-main-35:/layout/activity_analytics.xml"
     }
 ]

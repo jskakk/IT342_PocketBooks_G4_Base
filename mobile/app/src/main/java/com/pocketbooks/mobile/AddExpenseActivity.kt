@@ -10,8 +10,10 @@ import com.pocketbooks.mobile.model.CreateExpenseRequest
 import com.pocketbooks.mobile.network.ApiClient
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import android.app.DatePickerDialog
 
 class AddExpenseActivity : AppCompatActivity() {
 
@@ -32,11 +34,40 @@ class AddExpenseActivity : AppCompatActivity() {
         }
 
         binding.etDate.setText(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()))
+        // prevent keyboard and open date picker on click
+        binding.etDate.isFocusable = false
+        binding.etDate.setOnClickListener { openDatePicker() }
         binding.btnBack.setOnClickListener { finish() }
         binding.btnSaveExpense.setOnClickListener { submitExpense() }
 
         setupSpinners()
         loadMeta()
+    }
+
+    private fun openDatePicker() {
+        val calendar = Calendar.getInstance()
+        // parse current value if present
+        try {
+            val current = binding.etDate.text.toString()
+            if (current.isNotBlank()) {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val d = sdf.parse(current)
+                if (d != null) calendar.time = d
+            }
+        } catch (_: Exception) { }
+
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val dpd = DatePickerDialog(this, { _, y, m, d ->
+            val selectedCal = Calendar.getInstance()
+            selectedCal.set(y, m, d)
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            binding.etDate.setText(sdf.format(selectedCal.time))
+        }, year, month, day)
+
+        dpd.show()
     }
 
     private fun setupSpinners() {

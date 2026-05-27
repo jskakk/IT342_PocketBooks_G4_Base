@@ -4,12 +4,14 @@ package com.pocketbooks.mobile.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
+import com.google.android.material.button.MaterialButton;
 import com.pocketbooks.mobile.R;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -17,28 +19,68 @@ import java.lang.String;
 
 public final class ActivityHomeBinding implements ViewBinding {
   @NonNull
-  private final ConstraintLayout rootView;
+  private final ScrollView rootView;
+
+  @NonNull
+  public final MaterialButton btnLogout;
+
+  @NonNull
+  public final MaterialButton btnOpenAnalytics;
+
+  @NonNull
+  public final MaterialButton btnOpenExpense;
+
+  @NonNull
+  public final MaterialButton btnOpenSettings;
+
+  @NonNull
+  public final MaterialButton btnOpenWallet;
+
+  @NonNull
+  public final MaterialButton btnRefresh;
+
+  @NonNull
+  public final LinearLayout expenseContainer;
 
   @NonNull
   public final TextView tvEmail;
 
   @NonNull
-  public final TextView tvStatus;
+  public final TextView tvRecentTitle;
+
+  @NonNull
+  public final TextView tvWalletLabel;
+
+  @NonNull
+  public final TextView tvWalletValue;
 
   @NonNull
   public final TextView tvWelcome;
 
-  private ActivityHomeBinding(@NonNull ConstraintLayout rootView, @NonNull TextView tvEmail,
-      @NonNull TextView tvStatus, @NonNull TextView tvWelcome) {
+  private ActivityHomeBinding(@NonNull ScrollView rootView, @NonNull MaterialButton btnLogout,
+      @NonNull MaterialButton btnOpenAnalytics, @NonNull MaterialButton btnOpenExpense,
+      @NonNull MaterialButton btnOpenSettings, @NonNull MaterialButton btnOpenWallet,
+      @NonNull MaterialButton btnRefresh, @NonNull LinearLayout expenseContainer,
+      @NonNull TextView tvEmail, @NonNull TextView tvRecentTitle, @NonNull TextView tvWalletLabel,
+      @NonNull TextView tvWalletValue, @NonNull TextView tvWelcome) {
     this.rootView = rootView;
+    this.btnLogout = btnLogout;
+    this.btnOpenAnalytics = btnOpenAnalytics;
+    this.btnOpenExpense = btnOpenExpense;
+    this.btnOpenSettings = btnOpenSettings;
+    this.btnOpenWallet = btnOpenWallet;
+    this.btnRefresh = btnRefresh;
+    this.expenseContainer = expenseContainer;
     this.tvEmail = tvEmail;
-    this.tvStatus = tvStatus;
+    this.tvRecentTitle = tvRecentTitle;
+    this.tvWalletLabel = tvWalletLabel;
+    this.tvWalletValue = tvWalletValue;
     this.tvWelcome = tvWelcome;
   }
 
   @Override
   @NonNull
-  public ConstraintLayout getRoot() {
+  public ScrollView getRoot() {
     return rootView;
   }
 
@@ -63,15 +105,69 @@ public final class ActivityHomeBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btnLogout;
+      MaterialButton btnLogout = ViewBindings.findChildViewById(rootView, id);
+      if (btnLogout == null) {
+        break missingId;
+      }
+
+      id = R.id.btnOpenAnalytics;
+      MaterialButton btnOpenAnalytics = ViewBindings.findChildViewById(rootView, id);
+      if (btnOpenAnalytics == null) {
+        break missingId;
+      }
+
+      id = R.id.btnOpenExpense;
+      MaterialButton btnOpenExpense = ViewBindings.findChildViewById(rootView, id);
+      if (btnOpenExpense == null) {
+        break missingId;
+      }
+
+      id = R.id.btnOpenSettings;
+      MaterialButton btnOpenSettings = ViewBindings.findChildViewById(rootView, id);
+      if (btnOpenSettings == null) {
+        break missingId;
+      }
+
+      id = R.id.btnOpenWallet;
+      MaterialButton btnOpenWallet = ViewBindings.findChildViewById(rootView, id);
+      if (btnOpenWallet == null) {
+        break missingId;
+      }
+
+      id = R.id.btnRefresh;
+      MaterialButton btnRefresh = ViewBindings.findChildViewById(rootView, id);
+      if (btnRefresh == null) {
+        break missingId;
+      }
+
+      id = R.id.expenseContainer;
+      LinearLayout expenseContainer = ViewBindings.findChildViewById(rootView, id);
+      if (expenseContainer == null) {
+        break missingId;
+      }
+
       id = R.id.tvEmail;
       TextView tvEmail = ViewBindings.findChildViewById(rootView, id);
       if (tvEmail == null) {
         break missingId;
       }
 
-      id = R.id.tvStatus;
-      TextView tvStatus = ViewBindings.findChildViewById(rootView, id);
-      if (tvStatus == null) {
+      id = R.id.tvRecentTitle;
+      TextView tvRecentTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvRecentTitle == null) {
+        break missingId;
+      }
+
+      id = R.id.tvWalletLabel;
+      TextView tvWalletLabel = ViewBindings.findChildViewById(rootView, id);
+      if (tvWalletLabel == null) {
+        break missingId;
+      }
+
+      id = R.id.tvWalletValue;
+      TextView tvWalletValue = ViewBindings.findChildViewById(rootView, id);
+      if (tvWalletValue == null) {
         break missingId;
       }
 
@@ -81,7 +177,9 @@ public final class ActivityHomeBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityHomeBinding((ConstraintLayout) rootView, tvEmail, tvStatus, tvWelcome);
+      return new ActivityHomeBinding((ScrollView) rootView, btnLogout, btnOpenAnalytics,
+          btnOpenExpense, btnOpenSettings, btnOpenWallet, btnRefresh, expenseContainer, tvEmail,
+          tvRecentTitle, tvWalletLabel, tvWalletValue, tvWelcome);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
